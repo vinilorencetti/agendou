@@ -9,11 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Sobrescritos dinamicamente via CSS variables por tenant
         brand: {
           DEFAULT: 'var(--color-brand)',
           foreground: 'var(--color-brand-foreground)',
         },
+      },
+      spacing: {
+        18: '4.5rem',
       },
     },
   },

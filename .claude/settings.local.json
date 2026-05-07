@@ -16,7 +16,10 @@
       "Bash(ls node_modules/@supabase/supabase-js/dist/module/)",
       "Bash(mkdir -p \"C:\\\\Users\\\\vinic\\\\OneDrive\\\\Documentos\\\\Claude\\\\Projects\\\\agendou\\\\app\\\\[slug]\\\\entrar\")",
       "Bash(mkdir -p \"C:\\\\Users\\\\vinic\\\\OneDrive\\\\Documentos\\\\Claude\\\\Projects\\\\agendou\\\\app\\\\[slug]\\\\cadastro\")",
-      "Bash(mkdir -p \"C:\\\\Users\\\\vinic\\\\OneDrive\\\\Documentos\\\\Claude\\\\Projects\\\\agendou\\\\app\\\\[slug]\\\\perfil\")"
+      "Bash(mkdir -p \"C:\\\\Users\\\\vinic\\\\OneDrive\\\\Documentos\\\\Claude\\\\Projects\\\\agendou\\\\app\\\\[slug]\\\\perfil\")",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git add *)"
     ]
   }
 }

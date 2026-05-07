@@ -50,7 +50,7 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar slug={slug} tenantName={tenant.name} userRole={userRole!} />
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 p-4 pt-18 md:p-6 md:pt-6">{children}</main>
     </div>
   )
 }
