@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-brand: #000000;
+    --color-brand-foreground: #ffffff;
+  }
+}
