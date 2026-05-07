@@ -8,15 +8,22 @@ import type { ConfirmedBooking } from './booking-flow'
 export default function StepClientInfo({
   tenantId,
   booking,
+  userProfile,
   onConfirmed,
   onBack,
 }: {
   tenantId: string
   booking: ConfirmedBooking
+  userProfile?: { name: string; phone: string; email: string }
   onConfirmed: (appointmentId: string) => void
   onBack: () => void
 }) {
-  const [fields, setFields] = useState({ name: '', phone: '', email: '', notes: '' })
+  const [fields, setFields] = useState({
+    name: userProfile?.name ?? '',
+    phone: userProfile?.phone ?? '',
+    email: userProfile?.email ?? '',
+    notes: '',
+  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

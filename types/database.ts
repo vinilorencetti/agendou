@@ -36,6 +36,8 @@ export interface Database {
           cancellation_policy_hours: number
           plan: string
           plan_expires_at: string | null
+          whatsapp: string | null
+          instagram: string | null
           created_at: string
           updated_at: string
         }
@@ -60,6 +62,8 @@ export interface Database {
           cancellation_policy_hours?: number
           plan?: string
           plan_expires_at?: string | null
+          whatsapp?: string | null
+          instagram?: string | null
         }
         Update: Partial<Database['public']['Tables']['tenants']['Insert']>
         Relationships: []

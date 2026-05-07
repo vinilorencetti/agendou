@@ -39,11 +39,13 @@ export default function BookingFlow({
   tenantSlug,
   services,
   professionals,
+  userProfile,
 }: {
   tenantId: string
   tenantSlug: string
   services: Service[]
   professionals: Professional[]
+  userProfile?: { name: string; phone: string; email: string }
 }) {
   const [step, setStep] = useState<Step>('service')
   const [booking, setBooking] = useState<BookingState>({
@@ -151,6 +153,7 @@ export default function BookingFlow({
         <StepClientInfo
           tenantId={tenantId}
           booking={booking as ConfirmedBooking}
+          userProfile={userProfile}
           onConfirmed={(id) => {
             setAppointmentId(id)
             goNext()

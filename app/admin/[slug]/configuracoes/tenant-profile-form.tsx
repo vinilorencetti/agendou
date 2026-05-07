@@ -14,6 +14,8 @@ export default function TenantProfileForm({ tenant }: { tenant: Tenant }) {
     description: tenant.description ?? '',
     phone: tenant.phone ?? '',
     cancellationPolicyHours: String(tenant.cancellation_policy_hours),
+    whatsapp: tenant.whatsapp ?? '',
+    instagram: tenant.instagram ?? '',
   })
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -36,6 +38,8 @@ export default function TenantProfileForm({ tenant }: { tenant: Tenant }) {
       description: fields.description,
       phone: fields.phone,
       cancellationPolicyHours: parseInt(fields.cancellationPolicyHours) || 2,
+      whatsapp: fields.whatsapp,
+      instagram: fields.instagram,
     })
 
     if (!result.success) setError(result.error ?? null)
@@ -67,11 +71,26 @@ export default function TenantProfileForm({ tenant }: { tenant: Tenant }) {
       </div>
       <Input
         id="phone"
-        label="Telefone / WhatsApp"
+        label="Telefone"
         type="tel"
         placeholder="(11) 99999-9999"
         value={fields.phone}
         onChange={set('phone')}
+      />
+      <Input
+        id="whatsapp"
+        label="WhatsApp (número com DDD, sem espaços)"
+        type="tel"
+        placeholder="5511999999999"
+        value={fields.whatsapp}
+        onChange={set('whatsapp')}
+      />
+      <Input
+        id="instagram"
+        label="Instagram (@ do perfil)"
+        placeholder="@seunegocio"
+        value={fields.instagram}
+        onChange={set('instagram')}
       />
       <Input
         id="cancellation"

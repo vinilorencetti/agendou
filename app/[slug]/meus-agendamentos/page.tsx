@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getTenantBySlug } from '@/lib/queries/tenants'
 import { canClientCancel, cancelDeadlineLabel, TIMEZONE } from '@/lib/availability'
 import CancelButton from './cancel-button'
+import BottomNav from '@/components/ui/bottom-nav'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -13,7 +14,7 @@ export default async function MeusAgendamentosPage({ params }: Props) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect(`/entrar?redirect=/${slug}/meus-agendamentos`)
+  if (!user) redirect(`/${slug}/entrar?redirect=/${slug}/meus-agendamentos`)
 
   const { data: appointments } = await supabase
     .from('appointments')
@@ -62,7 +63,7 @@ export default async function MeusAgendamentosPage({ params }: Props) {
   }
 
   return (
-    <main className="mx-auto max-w-lg px-4 py-8">
+    <main className="mx-auto max-w-lg px-4 pb-24 py-8">
       <div className="mb-6 flex items-center gap-3">
         <a href={`/${slug}`} className="text-sm opacity-50 hover:opacity-100">←</a>
         <h1 className="text-xl font-bold">Meus agendamentos</h1>
@@ -136,6 +137,7 @@ export default async function MeusAgendamentosPage({ params }: Props) {
           })}
         </ul>
       )}
+      <BottomNav slug={slug} />
     </main>
   )
 }

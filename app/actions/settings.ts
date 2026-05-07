@@ -68,6 +68,8 @@ export async function updateTenantProfile(
     description?: string
     phone?: string
     cancellationPolicyHours?: number
+    whatsapp?: string
+    instagram?: string
   }
 ) {
   const supabase = await createClient()
@@ -81,6 +83,8 @@ export async function updateTenantProfile(
       ...(data.cancellationPolicyHours !== undefined && {
         cancellation_policy_hours: data.cancellationPolicyHours,
       }),
+      ...(data.whatsapp !== undefined && { whatsapp: data.whatsapp.trim() || null }),
+      ...(data.instagram !== undefined && { instagram: data.instagram.trim() || null }),
     })
     .eq('id', tenantId)
 

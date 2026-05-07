@@ -4,7 +4,17 @@
 
 @layer base {
   :root {
-    --color-brand: #000000;
+    --color-brand: #F97316;
+    --color-brand-secondary: #6b7280;
     --color-brand-foreground: #ffffff;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }

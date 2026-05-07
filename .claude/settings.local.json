@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/c/Users/vinic/OneDrive/Documentos/Claude/Projects/agendou/app/admin/[slug]/configuracoes/servicos\")",
+      "Bash(mkdir -p \"/c/Users/vinic/OneDrive/Documentos/Claude/Projects/agendou/app/admin/[slug]/configuracoes/profissionais\")",
+      "Bash(mkdir -p \"/c/Users/vinic/OneDrive/Documentos/Claude/Projects/agendou/app/admin/[slug]/configuracoes/horarios\")",
+      "Bash(mkdir -p \"/c/Users/vinic/OneDrive/Documentos/Claude/Projects/agendou/app/[slug]/meus-agendamentos\")",
+      "Bash(mkdir -p \"/c/Users/vinic/OneDrive/Documentos/Claude/Projects/agendou/app/admin/[slug]/meu-perfil\")",
+      "Bash(grep -o '\\\\\\(href\\\\|router\\\\.push\\\\|redirect\\\\\\)[[:space:]]*[=\\(/]*[[:space:]]*[\"\\\\x27`]/[^\"\\\\x27`]*')",
+      "Bash(git init *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(npm install *)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(ls node_modules/@supabase/supabase-js/dist/main/)",
+      "Bash(ls node_modules/@supabase/supabase-js/dist/module/)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\vinic\\\\OneDrive\\\\Documentos\\\\Claude\\\\Projects\\\\agendou\\\\app\\\\[slug]\\\\entrar\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\vinic\\\\OneDrive\\\\Documentos\\\\Claude\\\\Projects\\\\agendou\\\\app\\\\[slug]\\\\cadastro\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\vinic\\\\OneDrive\\\\Documentos\\\\Claude\\\\Projects\\\\agendou\\\\app\\\\[slug]\\\\perfil\")"
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { getTenantBySlug, getTenantServices, getTenantProfessionals } from '@/lib/queries/tenants'
 import BookingFlow from './booking-flow'
 
@@ -15,6 +16,18 @@ export default async function AgendarPage({ params }: Props) {
   const { slug } = await params
   const tenant = await getTenantBySlug(slug)
   if (!tenant) notFound()
+
+  // Auth gate — clientes devem ter conta
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect(`/${slug}/entrar?redirect=/${slug}/agendar`)
+
+  // Busca perfil do usuário para pré-preencher formulário
+  const { data: profile } = await supabase
+    .from('users')
+    .select('full_name, phone')
+    .eq('id', user.id)
+    .maybeSingle()
 
   const [services, professionals] = await Promise.all([
     getTenantServices(tenant.id),
@@ -53,6 +66,7 @@ export default async function AgendarPage({ params }: Props) {
         tenantSlug={slug}
         services={services}
         professionals={professionals}
+        userProfile={{ name: profile?.full_name ?? '', phone: profile?.phone ?? '', email: user.email ?? '' }}
       />
     </main>
   )
