@@ -61,10 +61,11 @@ function fmtDay(dateStr: string) {
 type ClientOption = { id: string; full_name: string; phone: string | null; email: string | null }
 
 export default function AgendaDayView({
-  date, today, appointments, professionals, services, clients, tenantId, slug,
+  date, today, appointments, professionals, services, clients, tenantId, slug, isBasico, myProfessionalId,
 }: {
   date: string; today: string; appointments: Appointment[]
-  professionals: Professional[]; services: Service[]; clients: ClientOption[]; tenantId: string; slug: string
+  professionals: Professional[]; services: Service[]; clients: ClientOption[]
+  tenantId: string; slug: string; isBasico?: boolean; myProfessionalId?: string
 }) {
   const router = useRouter()
   const hours = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR }, (_, i) => DAY_START_HOUR + i)
@@ -129,13 +130,15 @@ export default function AgendaDayView({
         )}
 
         <div className="ml-auto flex gap-2">
-          <button
-            onClick={() => setShowBlock(true)}
-            className="rounded-xl px-3 py-1.5 text-xs font-medium transition-colors"
-            style={navBtnStyle}
-          >
-            🚫 Bloquear
-          </button>
+          {!isBasico && (
+            <button
+              onClick={() => setShowBlock(true)}
+              className="rounded-xl px-3 py-1.5 text-xs font-medium transition-colors"
+              style={navBtnStyle}
+            >
+              🚫 Bloquear
+            </button>
+          )}
           <button
             onClick={() => setShowBooking(true)}
             className="rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition-all active:scale-[0.98]"
@@ -263,6 +266,7 @@ export default function AgendaDayView({
         services={services}
         clients={clients}
         defaultDate={date}
+        defaultProfessionalId={myProfessionalId}
       />
       <BlockTimeModal
         open={showBlock}
