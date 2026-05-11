@@ -97,8 +97,43 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
 
   const monthLabel = new Date(year, mon - 1, 15).toLocaleDateString('pt-BR', { month: 'long', timeZone: TZ })
 
+  const todayFormatted = new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ,
+  })
+
   return (
     <div className="flex flex-col gap-5">
+      {/* ── Header com identidade ── */}
+      <div
+        className="relative overflow-hidden rounded-2xl px-6 py-5"
+        style={{ background: 'linear-gradient(135deg, #2D1B69 0%, #1E1040 100%)', border: '1px solid rgba(124,58,237,0.25)' }}
+      >
+        {/* Decoração */}
+        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-20"
+          style={{ background: 'var(--agendou-gradient)' }} />
+        <div className="pointer-events-none absolute -bottom-6 left-1/3 h-20 w-20 rounded-full opacity-10"
+          style={{ background: 'var(--agendou-gradient)' }} />
+
+        <div className="relative flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium capitalize" style={{ color: 'rgba(196,181,253,0.7)' }}>{todayFormatted}</p>
+            <h1 className="mt-1 text-2xl font-black tracking-tight" style={{ color: '#F8F7FF' }}>
+              {tenant.name}
+            </h1>
+            <p className="mt-0.5 text-sm" style={{ color: 'rgba(196,181,253,0.6)' }}>
+              agendou.com.br/{slug}
+            </p>
+          </div>
+          <Link
+            href={`/admin/${slug}/agenda`}
+            className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-900/40 transition-all active:scale-[0.98] hover:opacity-90"
+            style={{ background: 'var(--agendou-gradient)' }}
+          >
+            Ver agenda
+          </Link>
+        </div>
+      </div>
+
       {welcome === '1' && (
         <div
           className="rounded-2xl p-4"
@@ -113,17 +148,6 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
           </p>
         </div>
       )}
-
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Dashboard</h1>
-        <Link
-          href={`/admin/${slug}/agenda`}
-          className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 transition-all active:scale-[0.98]"
-          style={{ background: 'var(--agendou-gradient)' }}
-        >
-          Ver agenda
-        </Link>
-      </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

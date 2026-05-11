@@ -103,12 +103,24 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
         {loading ? 'Entrando...' : 'Entrar'}
       </button>
 
-      <p className="text-center text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
-        Não tem conta?{' '}
-        <a href="/cadastro" className="font-medium underline" style={{ color: 'var(--color-brand-secondary)' }}>
-          Cadastre seu negócio
-        </a>
-      </p>
+      <div className="relative my-1">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t" style={{ borderColor: 'var(--agendou-border)' }} />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="px-3 text-xs" style={{ backgroundColor: 'var(--agendou-surface)', color: 'var(--agendou-text-faint)' }}>
+            ou
+          </span>
+        </div>
+      </div>
+
+      <a
+        href="/cadastro"
+        className="flex w-full items-center justify-center rounded-xl py-2.5 text-sm font-medium transition-colors"
+        style={{ border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-muted)', backgroundColor: 'var(--agendou-surface-2)' }}
+      >
+        Criar conta grátis
+      </a>
     </form>
   )
 }
