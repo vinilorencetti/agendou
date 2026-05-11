@@ -267,11 +267,18 @@ export default function ManualBookingModal({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setShowDropdown(true) }}
-                  onFocus={() => setShowDropdown(true)}
+                  onFocus={(e) => {
+                    setShowDropdown(true)
+                    e.currentTarget.style.borderColor = 'var(--agendou-border-purple)'
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)'
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--agendou-border)'
+                    e.currentTarget.style.boxShadow = ''
+                  }}
                   placeholder="Buscar por nome ou telefone..."
                   className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
                   style={inputStyle}
-                  {...focusHandlers}
                 />
 
                 {showDropdown && (filteredClients.length > 0 || searchQuery.trim().length >= 1) && (
