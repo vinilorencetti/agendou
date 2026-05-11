@@ -1,6 +1,36 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // Se o usuário já está logado, redireciona para o painel correto
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('role, tenant_id, tenants(slug)')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+
+    const geralRole = roles?.find((r) => r.role === 'adm_geral')
+    if (geralRole) {
+      const slug = (geralRole.tenants as { slug: string } | null)?.slug
+      if (slug) redirect(`/admin/${slug}`)
+    }
+
+    const basicRole = roles?.find((r) => r.role === 'adm_basico')
+    if (basicRole) {
+      const slug = (basicRole.tenants as { slug: string } | null)?.slug
+      if (slug) redirect(`/admin/${slug}`)
+    }
+
+    if (roles?.find((r) => r.role === 'master_admin')) redirect('/master-admin')
+
+    // Logado mas sem tenant — onboarding
+    redirect('/onboarding')
+  }
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8" style={{ backgroundColor: 'var(--agendou-bg)' }}>
       {/* Logo mark */}
