@@ -33,57 +33,148 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
   const tenant = await getTenantBySlug(slug)
   if (!tenant) return null
 
+  // Detecta o papel do usuário logado
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: roleData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user!.id)
+    .eq('tenant_id', tenant.id)
+    .in('role', ['adm_geral', 'adm_basico'])
+    .eq('is_active', true)
+    .maybeSingle()
+
+  const isBasico = roleData?.role === 'adm_basico'
+
+  // Para adm_basico: busca o profissional vinculado
+  let myProfessional: { id: string; name: string } | null = null
+  let myUserName: string | null = null
+  if (isBasico) {
+    const [{ data: pro }, { data: profile }] = await Promise.all([
+      supabase
+        .from('professionals')
+        .select('id, name')
+        .eq('tenant_id', tenant.id)
+        .eq('user_id', user!.id)
+        .maybeSingle(),
+      supabase
+        .from('users')
+        .select('full_name')
+        .eq('id', user!.id)
+        .maybeSingle(),
+    ])
+    myProfessional = pro
+    myUserName = profile?.full_name ?? null
+  }
+
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: TZ })
   const currentMonth = today.slice(0, 7)
   const [year, mon] = currentMonth.split('-').map(Number)
   const firstOfMonth = `${currentMonth}-01`
   const lastOfMonth = new Date(year, mon, 0).toISOString().split('T')[0]
 
-  const [
-    { data: todayAppts },
-    { data: upcomingAppts },
-    { count: pendingCount },
-    { data: monthRevenue },
-    { count: clientCount },
-  ] = await Promise.all([
-    supabase
-      .from('appointments')
-      .select('id, starts_at, ends_at, status, services(name), professionals(name), clients(full_name)')
-      .eq('tenant_id', tenant.id)
-      .gte('starts_at', `${today}T00:00:00Z`)
-      .lte('starts_at', `${today}T23:59:59Z`)
-      .not('status', 'in', '("cancelled","no_show")')
-      .order('starts_at'),
+  // ── Queries filtradas por papel ────────────────────────────────
+  let todayAppts: any[] | null = null
+  let upcomingAppts: any[] | null = null
+  let pendingCount: number | null = null
+  let monthRevenue: { amount: number }[] | null = null
+  let clientCount: number | null = null
 
-    supabase
-      .from('appointments')
-      .select('id, starts_at, status, services(name), professionals(name), clients(full_name)')
-      .eq('tenant_id', tenant.id)
-      .gt('starts_at', `${today}T23:59:59Z`)
-      .not('status', 'in', '("cancelled","no_show")')
-      .order('starts_at')
-      .limit(5),
+  if (isBasico && myProfessional) {
+    // adm_basico: só vê seus próprios dados
+    const [a, b, c, d] = await Promise.all([
+      supabase
+        .from('appointments')
+        .select('id, starts_at, ends_at, status, services(name), clients(full_name)')
+        .eq('tenant_id', tenant.id)
+        .eq('professional_id', myProfessional.id)
+        .gte('starts_at', `${today}T00:00:00Z`)
+        .lte('starts_at', `${today}T23:59:59Z`)
+        .not('status', 'in', '("cancelled","no_show")')
+        .order('starts_at'),
 
-    supabase
-      .from('appointments')
-      .select('*', { count: 'exact', head: true })
-      .eq('tenant_id', tenant.id)
-      .eq('status', 'pending'),
+      supabase
+        .from('appointments')
+        .select('id, starts_at, status, services(name), clients(full_name)')
+        .eq('tenant_id', tenant.id)
+        .eq('professional_id', myProfessional.id)
+        .gt('starts_at', `${today}T23:59:59Z`)
+        .not('status', 'in', '("cancelled","no_show")')
+        .order('starts_at')
+        .limit(5),
 
-    supabase
-      .from('financial_entries')
-      .select('amount')
-      .eq('tenant_id', tenant.id)
-      .eq('type', 'income')
-      .eq('status', 'paid')
-      .gte('due_date', firstOfMonth)
-      .lte('due_date', lastOfMonth),
+      supabase
+        .from('financial_entries')
+        .select('amount')
+        .eq('tenant_id', tenant.id)
+        .eq('professional_id', myProfessional.id)
+        .eq('type', 'income')
+        .eq('status', 'paid')
+        .gte('due_date', firstOfMonth)
+        .lte('due_date', lastOfMonth),
 
-    supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('tenant_id', tenant.id),
-  ])
+      // Conta total de clientes atendidos pelo profissional
+      supabase
+        .from('appointments')
+        .select('client_id')
+        .eq('tenant_id', tenant.id)
+        .eq('professional_id', myProfessional.id)
+        .eq('status', 'completed'),
+    ])
+    todayAppts = a.data
+    upcomingAppts = b.data
+    monthRevenue = c.data
+    // clientes únicos atendidos
+    const uniqueClients = new Set((d.data ?? []).map((x: any) => x.client_id))
+    clientCount = uniqueClients.size
+    pendingCount = null // não exibe pendentes no dashboard básico
+  } else {
+    // adm_geral / master_admin: vê tudo
+    const [a, b, c, d, e] = await Promise.all([
+      supabase
+        .from('appointments')
+        .select('id, starts_at, ends_at, status, services(name), professionals(name), clients(full_name)')
+        .eq('tenant_id', tenant.id)
+        .gte('starts_at', `${today}T00:00:00Z`)
+        .lte('starts_at', `${today}T23:59:59Z`)
+        .not('status', 'in', '("cancelled","no_show")')
+        .order('starts_at'),
+
+      supabase
+        .from('appointments')
+        .select('id, starts_at, status, services(name), professionals(name), clients(full_name)')
+        .eq('tenant_id', tenant.id)
+        .gt('starts_at', `${today}T23:59:59Z`)
+        .not('status', 'in', '("cancelled","no_show")')
+        .order('starts_at')
+        .limit(5),
+
+      supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', tenant.id)
+        .eq('status', 'pending'),
+
+      supabase
+        .from('financial_entries')
+        .select('amount')
+        .eq('tenant_id', tenant.id)
+        .eq('type', 'income')
+        .eq('status', 'paid')
+        .gte('due_date', firstOfMonth)
+        .lte('due_date', lastOfMonth),
+
+      supabase
+        .from('clients')
+        .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', tenant.id),
+    ])
+    todayAppts = a.data
+    upcomingAppts = b.data
+    pendingCount = c.count
+    monthRevenue = d.data
+    clientCount = e.count
+  }
 
   const totalRevenue = (monthRevenue ?? []).reduce((s, e) => s + e.amount, 0)
   const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -96,19 +187,17 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
   }
 
   const monthLabel = new Date(year, mon - 1, 15).toLocaleDateString('pt-BR', { month: 'long', timeZone: TZ })
-
   const todayFormatted = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ,
   })
 
   return (
     <div className="flex flex-col gap-5">
-      {/* ── Header com identidade ── */}
+      {/* ── Header ── */}
       <div
         className="relative overflow-hidden rounded-2xl px-6 py-5"
         style={{ background: 'linear-gradient(135deg, #2D1B69 0%, #1E1040 100%)', border: '1px solid rgba(124,58,237,0.25)' }}
       >
-        {/* Decoração */}
         <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-20"
           style={{ background: 'var(--agendou-gradient)' }} />
         <div className="pointer-events-none absolute -bottom-6 left-1/3 h-20 w-20 rounded-full opacity-10"
@@ -117,12 +206,25 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
         <div className="relative flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium capitalize" style={{ color: 'rgba(196,181,253,0.7)' }}>{todayFormatted}</p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight" style={{ color: '#F8F7FF' }}>
-              {tenant.name}
-            </h1>
-            <p className="mt-0.5 text-sm" style={{ color: 'rgba(196,181,253,0.6)' }}>
-              agendou.com.br/{slug}
-            </p>
+            {isBasico ? (
+              <>
+                <h1 className="mt-1 text-2xl font-black tracking-tight" style={{ color: '#F8F7FF' }}>
+                  Olá, {myUserName ?? myProfessional?.name ?? 'bem-vindo'}! 👋
+                </h1>
+                <p className="mt-0.5 text-sm" style={{ color: 'rgba(196,181,253,0.6)' }}>
+                  {tenant.name}
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="mt-1 text-2xl font-black tracking-tight" style={{ color: '#F8F7FF' }}>
+                  {tenant.name}
+                </h1>
+                <p className="mt-0.5 text-sm" style={{ color: 'rgba(196,181,253,0.6)' }}>
+                  agendou.com.br/{slug}
+                </p>
+              </>
+            )}
           </div>
           <Link
             href={`/admin/${slug}/agenda`}
@@ -134,7 +236,7 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
         </div>
       </div>
 
-      {welcome === '1' && (
+      {welcome === '1' && !isBasico && (
         <div
           className="rounded-2xl p-4"
           style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}
@@ -149,25 +251,49 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
         </div>
       )}
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Agendamentos hoje" value={String(todayAppts?.length ?? 0)}
-          href={`/admin/${slug}/agenda`} />
-        <StatCard label="Pendentes" value={String(pendingCount ?? 0)}
-          valueStyle={pendingCount ? { color: '#FACC15' } : undefined}
-          href={`/admin/${slug}/agenda`} />
-        <StatCard label={`Receita — ${monthLabel}`} value={fmt.format(totalRevenue)}
-          valueStyle={{ color: '#4ADE80' }}
-          href={`/admin/${slug}/financeiro`} />
-        <StatCard label="Clientes cadastrados" value={String(clientCount ?? 0)}
-          href={`/admin/${slug}/clientes`} />
-      </div>
+      {/* ── Stat cards ── */}
+      {isBasico ? (
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard
+            label="Meus agendamentos hoje"
+            value={String(todayAppts?.length ?? 0)}
+            href={`/admin/${slug}/agenda`}
+          />
+          <StatCard
+            label={`Minha receita — ${monthLabel}`}
+            value={fmt.format(totalRevenue)}
+            valueStyle={{ color: '#4ADE80' }}
+            href={`/admin/${slug}/agenda`}
+          />
+          <StatCard
+            label="Clientes atendidos"
+            value={String(clientCount ?? 0)}
+            href={`/admin/${slug}/agenda`}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard label="Agendamentos hoje" value={String(todayAppts?.length ?? 0)}
+            href={`/admin/${slug}/agenda`} />
+          <StatCard label="Pendentes" value={String(pendingCount ?? 0)}
+            valueStyle={pendingCount ? { color: '#FACC15' } : undefined}
+            href={`/admin/${slug}/agenda`} />
+          <StatCard label={`Receita — ${monthLabel}`} value={fmt.format(totalRevenue)}
+            valueStyle={{ color: '#4ADE80' }}
+            href={`/admin/${slug}/financeiro`} />
+          <StatCard label="Clientes cadastrados" value={String(clientCount ?? 0)}
+            href={`/admin/${slug}/clientes`} />
+        </div>
+      )}
 
+      {/* ── Listas ── */}
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Agenda do dia */}
         <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
           <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--agendou-border)' }}>
-            <h2 className="font-semibold" style={{ color: 'var(--agendou-text)' }}>Hoje</h2>
+            <h2 className="font-semibold" style={{ color: 'var(--agendou-text)' }}>
+              {isBasico ? 'Minha agenda hoje' : 'Hoje'}
+            </h2>
             <Link href={`/admin/${slug}/agenda`} className="text-xs transition-colors" style={{ color: 'var(--agendou-text-faint)' }}>
               Ver agenda →
             </Link>
@@ -179,11 +305,8 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
           ) : (
             <ul>
               {todayAppts.map((a, i) => (
-                <li
-                  key={a.id}
-                  className="flex items-center gap-3 px-5 py-3"
-                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}
-                >
+                <li key={a.id} className="flex items-center gap-3 px-5 py-3"
+                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}>
                   <div className="w-16 shrink-0 text-center">
                     <p className="text-sm font-semibold tabular-nums" style={{ color: 'var(--agendou-text)' }}>{fmtTime(a.starts_at)}</p>
                     <p className="text-[10px]" style={{ color: 'var(--agendou-text-faint)' }}>{fmtTime(a.ends_at)}</p>
@@ -191,16 +314,15 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium" style={{ color: 'var(--agendou-text)' }}>{(a.clients as any)?.full_name}</p>
                     <p className="truncate text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
-                      {(a.services as any)?.name} · {(a.professionals as any)?.name}
+                      {(a.services as any)?.name}
+                      {!isBasico && ` · ${(a.professionals as any)?.name}`}
                     </p>
                   </div>
                   {(() => {
                     const st = STATUS_COLORS[a.status]
                     return (
-                      <span
-                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                        style={{ backgroundColor: st?.bg ?? 'rgba(255,255,255,0.08)', color: st?.text ?? 'var(--agendou-text-muted)' }}
-                      >
+                      <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                        style={{ backgroundColor: st?.bg ?? 'rgba(255,255,255,0.08)', color: st?.text ?? 'var(--agendou-text-muted)' }}>
                         {STATUS_LABELS[a.status]}
                       </span>
                     )
@@ -211,10 +333,12 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
           )}
         </div>
 
-        {/* Próximos agendamentos */}
+        {/* Próximos */}
         <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
           <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--agendou-border)' }}>
-            <h2 className="font-semibold" style={{ color: 'var(--agendou-text)' }}>Próximos agendamentos</h2>
+            <h2 className="font-semibold" style={{ color: 'var(--agendou-text)' }}>
+              {isBasico ? 'Meus próximos agendamentos' : 'Próximos agendamentos'}
+            </h2>
           </div>
           {!upcomingAppts || upcomingAppts.length === 0 ? (
             <p className="px-5 py-10 text-center text-sm" style={{ color: 'var(--agendou-text-faint)' }}>
@@ -223,11 +347,8 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
           ) : (
             <ul>
               {upcomingAppts.map((a, i) => (
-                <li
-                  key={a.id}
-                  className="flex items-center gap-3 px-5 py-3"
-                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}
-                >
+                <li key={a.id} className="flex items-center gap-3 px-5 py-3"
+                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}>
                   <div className="w-24 shrink-0">
                     <p className="text-xs font-medium capitalize" style={{ color: 'var(--agendou-text-muted)' }}>{fmtDate(a.starts_at)}</p>
                     <p className="text-sm font-semibold tabular-nums" style={{ color: 'var(--agendou-text)' }}>{fmtTime(a.starts_at)}</p>
@@ -235,16 +356,15 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium" style={{ color: 'var(--agendou-text)' }}>{(a.clients as any)?.full_name}</p>
                     <p className="truncate text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
-                      {(a.services as any)?.name} · {(a.professionals as any)?.name}
+                      {(a.services as any)?.name}
+                      {!isBasico && ` · ${(a.professionals as any)?.name}`}
                     </p>
                   </div>
                   {(() => {
                     const st = STATUS_COLORS[a.status]
                     return (
-                      <span
-                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                        style={{ backgroundColor: st?.bg ?? 'rgba(255,255,255,0.08)', color: st?.text ?? 'var(--agendou-text-muted)' }}
-                      >
+                      <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                        style={{ backgroundColor: st?.bg ?? 'rgba(255,255,255,0.08)', color: st?.text ?? 'var(--agendou-text-muted)' }}>
                         {STATUS_LABELS[a.status]}
                       </span>
                     )
@@ -256,26 +376,28 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
         </div>
       </div>
 
-      {/* Atalhos */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          { label: 'Novo agendamento', href: `/admin/${slug}/agenda`, icon: '📅' },
-          { label: 'Gerenciar serviços', href: `/admin/${slug}/configuracoes/servicos`, icon: '✂️' },
-          { label: 'Gerenciar equipe', href: `/admin/${slug}/configuracoes/profissionais`, icon: '👥' },
-          { label: 'Ver página pública', href: `/${slug}`, icon: '↗', external: true },
-        ].map((s) => (
-          <Link
-            key={s.href}
-            href={s.href}
-            target={s.external ? '_blank' : undefined}
-            className="flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-all active:scale-[0.98]"
-            style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-muted)' }}
-          >
-            <span>{s.icon}</span>
-            {s.label}
-          </Link>
-        ))}
-      </div>
+      {/* Atalhos — só para adm_geral */}
+      {!isBasico && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: 'Novo agendamento', href: `/admin/${slug}/agenda`, icon: '📅' },
+            { label: 'Gerenciar serviços', href: `/admin/${slug}/configuracoes/servicos`, icon: '✂️' },
+            { label: 'Gerenciar equipe', href: `/admin/${slug}/configuracoes/profissionais`, icon: '👥' },
+            { label: 'Ver página pública', href: `/${slug}`, icon: '↗', external: true },
+          ].map((s) => (
+            <Link
+              key={s.href}
+              href={s.href}
+              target={s.external ? '_blank' : undefined}
+              className="flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-all active:scale-[0.98]"
+              style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-muted)' }}
+            >
+              <span>{s.icon}</span>
+              {s.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

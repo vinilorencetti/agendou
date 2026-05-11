@@ -16,36 +16,30 @@ export default async function AdminLayout({
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect(`/entrar?redirect=/admin/${slug}`)
+    redirect(`/admin/${slug}/entrar`)
   }
 
   const tenant = await getTenantBySlug(slug)
   if (!tenant) notFound()
 
-  // Verifica se o usuário tem acesso a este tenant
-  const { data: roleData } = await supabase
+  // Busca role do usuário neste tenant (ou master_admin global)
+  const { data: roles } = await supabase
     .from('user_roles')
-    .select('role')
+    .select('role, tenant_id')
     .eq('user_id', user.id)
-    .eq('tenant_id', tenant.id)
     .eq('is_active', true)
-    .in('role', ['adm_geral', 'adm_basico'])
-    .single()
+    .in('role', ['adm_geral', 'adm_basico', 'master_admin'])
 
-  // master_admin tem acesso a tudo
-  const { data: masterRole } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('role', 'master_admin')
-    .eq('is_active', true)
-    .single()
+  const masterRole = roles?.find((r) => r.role === 'master_admin')
+  const tenantRole = roles?.find(
+    (r) => r.tenant_id === tenant.id && (r.role === 'adm_geral' || r.role === 'adm_basico')
+  )
 
-  if (!roleData && !masterRole) {
-    redirect('/entrar')
+  if (!tenantRole && !masterRole) {
+    redirect(`/admin/${slug}/entrar?error=no-access`)
   }
 
-  const userRole = masterRole?.role ?? roleData?.role
+  const userRole = masterRole?.role ?? tenantRole?.role
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: 'var(--agendou-bg)' }}>

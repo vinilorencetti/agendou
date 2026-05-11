@@ -181,7 +181,7 @@ function NavContent({
           Ver página pública
         </Link>
         <LogoutButton
-          redirectTo="/entrar"
+          redirectTo={`/admin/${slug}/entrar`}
           className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs transition-colors"
           style={{ color: 'var(--agendou-text-faint)' } as React.CSSProperties}
         >
