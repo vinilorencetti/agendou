@@ -129,8 +129,7 @@ export default function AppearanceEditor({ tenant }: { tenant: Tenant }) {
         </p>
         <div
           className="overflow-hidden rounded-2xl shadow-sm"
-          style={{ border: '1px solid var(--agendou-border)' }}
-          style={{ backgroundColor: state.backgroundColor }}
+          style={{ border: '1px solid var(--agendou-border)', backgroundColor: state.backgroundColor }}
         >
           {/* Header */}
           <div
