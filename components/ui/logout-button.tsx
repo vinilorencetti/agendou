@@ -6,10 +6,12 @@ import { createClient } from '@/lib/supabase/client'
 export default function LogoutButton({
   redirectTo = '/',
   className,
+  style,
   children,
 }: {
   redirectTo?: string
   className?: string
+  style?: React.CSSProperties
   children?: React.ReactNode
 }) {
   const router = useRouter()
@@ -22,7 +24,7 @@ export default function LogoutButton({
   }
 
   return (
-    <button onClick={handleLogout} className={className}>
+    <button onClick={handleLogout} className={className} style={style}>
       {children ?? 'Sair'}
     </button>
   )
