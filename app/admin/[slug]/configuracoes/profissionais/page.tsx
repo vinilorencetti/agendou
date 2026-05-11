@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getTenantBySlug } from '@/lib/queries/tenants'
 import { getProfessionals } from '@/lib/queries/professionals'
 import { getServices } from '@/lib/queries/services'
+import { createClient } from '@/lib/supabase/server'
 import ProfessionalsManager from './professionals-manager'
 
 export const metadata: Metadata = { title: 'Profissionais' }
@@ -13,10 +14,17 @@ export default async function ProfissionaisPage({ params }: Props) {
   const tenant = await getTenantBySlug(slug)
   if (!tenant) return null
 
-  const [professionals, services] = await Promise.all([
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const [professionals, services, profileResult] = await Promise.all([
     getProfessionals(tenant.id),
     getServices(tenant.id),
+    supabase.from('users').select('full_name').eq('id', user!.id).maybeSingle(),
   ])
+
+  // Verifica se o dono já tem um profissional vinculado
+  const ownerHasProfessional = professionals.some((p) => p.user_id === user!.id)
 
   return (
     <div className="max-w-2xl">
@@ -30,6 +38,9 @@ export default async function ProfissionaisPage({ params }: Props) {
         tenantId={tenant.id}
         initialProfessionals={professionals}
         services={services}
+        ownerName={profileResult.data?.full_name ?? ''}
+        ownerUserId={user!.id}
+        ownerHasProfessional={ownerHasProfessional}
       />
     </div>
   )

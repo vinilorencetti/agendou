@@ -12,6 +12,8 @@ type ProfessionalInput = {
   commissionPct?: number
   serviceIds: string[]
   avatarUrl?: string
+  isActive?: boolean
+  userId?: string | null
 }
 
 export async function createProfessional(input: ProfessionalInput) {
@@ -25,7 +27,8 @@ export async function createProfessional(input: ProfessionalInput) {
       bio: input.bio?.trim() || null,
       commission_pct: input.commissionPct ?? 0,
       avatar_url: input.avatarUrl || null,
-      is_active: true,
+      is_active: input.isActive ?? true,
+      user_id: input.userId ?? null,
     })
     .select('id')
     .single()
@@ -68,6 +71,7 @@ export async function updateProfessional(
       ...(input.bio !== undefined && { bio: input.bio?.trim() || null }),
       ...(input.commissionPct !== undefined && { commission_pct: input.commissionPct }),
       ...(input.avatarUrl !== undefined && { avatar_url: input.avatarUrl || null }),
+      ...(input.isActive !== undefined && { is_active: input.isActive }),
     })
     .eq('id', id)
     .eq('tenant_id', input.tenantId)
@@ -135,6 +139,25 @@ export async function saveProfessionalSchedule(
   )
 
   if (error) return { success: false, error: 'Erro ao salvar horários.' }
+
+  const slug = await getTenantSlug(tenantId)
+  revalidatePath(`/admin/${slug}/configuracoes/profissionais`)
+  return { success: true }
+}
+
+export async function toggleProfessionalActive(
+  id: string,
+  tenantId: string,
+  isActive: boolean,
+) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('professionals')
+    .update({ is_active: isActive })
+    .eq('id', id)
+    .eq('tenant_id', tenantId)
+
+  if (error) return { success: false, error: 'Erro ao atualizar status.' }
 
   const slug = await getTenantSlug(tenantId)
   revalidatePath(`/admin/${slug}/configuracoes/profissionais`)
