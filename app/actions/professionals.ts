@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { DayOfWeek } from '@/types/database'
 
 type ProfessionalInput = {
@@ -144,4 +145,78 @@ async function getTenantSlug(tenantId: string) {
   const supabase = await createClient()
   const { data } = await supabase.from('tenants').select('slug').eq('id', tenantId).single()
   return data?.slug ?? ''
+}
+
+export async function createProfessionalAccount(
+  professionalId: string,
+  tenantId: string,
+  email: string,
+  password: string,
+) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+
+  // Busca o profissional para obter o nome e verificar se já tem conta
+  const { data: pro, error: proError } = await supabase
+    .from('professionals')
+    .select('id, name, user_id')
+    .eq('id', professionalId)
+    .eq('tenant_id', tenantId)
+    .single()
+
+  if (proError || !pro) return { success: false, error: 'Profissional não encontrado.' }
+  if (pro.user_id) return { success: false, error: 'Este profissional já possui uma conta.' }
+
+  // Cria o usuário na autenticação (sem precisar confirmar e-mail)
+  const { data: authData, error: authError } = await admin.auth.admin.createUser({
+    email: email.trim().toLowerCase(),
+    password,
+    email_confirm: true,
+  })
+
+  if (authError || !authData.user) {
+    if (authError?.message?.toLowerCase().includes('already')) {
+      return { success: false, error: 'Este e-mail já está em uso.' }
+    }
+    return { success: false, error: 'Erro ao criar credenciais. Tente novamente.' }
+  }
+
+  const userId = authData.user.id
+
+  // Cria registro na tabela users
+  const { error: userError } = await admin
+    .from('users')
+    .insert({ id: userId, full_name: pro.name })
+
+  if (userError) {
+    // Faz rollback do auth user para não deixar lixo
+    await admin.auth.admin.deleteUser(userId)
+    return { success: false, error: 'Erro ao criar perfil do usuário.' }
+  }
+
+  // Cria a role adm_basico vinculada ao tenant
+  const { error: roleError } = await admin
+    .from('user_roles')
+    .insert({ user_id: userId, tenant_id: tenantId, role: 'adm_basico' })
+
+  if (roleError) {
+    await admin.auth.admin.deleteUser(userId)
+    return { success: false, error: 'Erro ao atribuir permissões.' }
+  }
+
+  // Vincula o user_id ao profissional
+  const { error: linkError } = await supabase
+    .from('professionals')
+    .update({ user_id: userId })
+    .eq('id', professionalId)
+    .eq('tenant_id', tenantId)
+
+  if (linkError) {
+    // Não faz rollback — usuário foi criado, mas log o problema
+    return { success: false, error: 'Conta criada, mas falha ao vincular ao profissional.' }
+  }
+
+  const slug = await getTenantSlug(tenantId)
+  revalidatePath(`/admin/${slug}/configuracoes/profissionais`)
+  return { success: true }
 }

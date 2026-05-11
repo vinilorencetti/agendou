@@ -7,6 +7,7 @@ import Modal from '@/components/ui/modal'
 import ImageUpload from '@/components/ui/image-upload'
 import ScheduleEditor from './schedule-editor'
 import { createProfessional, updateProfessional, deleteProfessional } from '@/app/actions/professionals'
+import CreateAccountModal from './create-account-modal'
 import type { Database } from '@/types/database'
 
 type Professional = Database['public']['Tables']['professionals']['Row'] & {
@@ -35,7 +36,7 @@ export default function ProfessionalsManager({
   services: Service[]
 }) {
   const [professionals, setProfessionals] = useState(initialProfessionals)
-  const [modal, setModal] = useState<'create' | 'edit' | 'schedule' | null>(null)
+  const [modal, setModal] = useState<'create' | 'edit' | 'schedule' | 'account' | null>(null)
   const [editing, setEditing] = useState<Professional | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
@@ -64,6 +65,11 @@ export default function ProfessionalsManager({
   function openSchedule(pro: Professional) {
     setEditing(pro)
     setModal('schedule')
+  }
+
+  function openAccount(pro: Professional) {
+    setEditing(pro)
+    setModal('account')
   }
 
   function set(key: keyof Omit<FormState, 'serviceIds'>) {
@@ -191,6 +197,29 @@ export default function ProfessionalsManager({
                   >
                     📅 Horários
                   </button>
+
+                  {/* Acesso do profissional */}
+                  {pro.user_id ? (
+                    <span
+                      title="Acesso ativo"
+                      className="rounded-lg px-2 py-1.5 text-xs font-medium"
+                      style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#4ADE80' }}
+                    >
+                      🔑 Ativo
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => openAccount(pro)}
+                      title="Criar acesso"
+                      className="rounded-lg px-2 py-1.5 text-xs transition-colors"
+                      style={{ backgroundColor: 'rgba(124,58,237,0.12)', color: '#A78BFA' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(124,58,237,0.22)' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(124,58,237,0.12)' }}
+                    >
+                      🔑 Criar acesso
+                    </button>
+                  )}
+
                   <button
                     onClick={() => openEdit(pro)}
                     className="rounded-lg p-1.5 transition-colors"
@@ -329,6 +358,24 @@ export default function ProfessionalsManager({
             onClose={closeModal}
           />
         </Modal>
+      )}
+
+      {/* Modal: criar acesso adm_basico */}
+      {editing && modal === 'account' && (
+        <CreateAccountModal
+          open
+          onClose={closeModal}
+          professionalId={editing.id}
+          professionalName={editing.name}
+          tenantId={tenantId}
+          onSuccess={() => {
+            setProfessionals((prev) =>
+              prev.map((p) =>
+                p.id === editing.id ? { ...p, user_id: '__pending__' } : p
+              )
+            )
+          }}
+        />
       )}
     </>
   )
