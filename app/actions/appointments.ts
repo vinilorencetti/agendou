@@ -2,6 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import type { AppointmentStatus } from '@/types/database'
+import { getResend, FROM_EMAIL } from '@/lib/email'
+import { bookingConfirmationHtml, bookingConfirmationText } from '@/lib/emails/booking-confirmation'
+import { TIMEZONE } from '@/lib/availability'
 
 export type BookingInput = {
   tenantId: string
@@ -131,6 +134,20 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
     due_date: input.startUtc.split('T')[0],
     category: 'service',
   })
+
+  // Envia e-mail de confirmação (fire-and-forget — não bloqueia resposta)
+  if (input.clientEmail) {
+    sendBookingConfirmationEmail({
+      tenantId: input.tenantId,
+      clientName: input.clientName,
+      clientEmail: input.clientEmail,
+      serviceName: service.name,
+      professionalId: input.professionalId,
+      startUtc: input.startUtc,
+      price: service.price,
+      appointmentId: appointment.id,
+    }).catch(() => { /* silently ignore email errors */ })
+  }
 
   return { success: true, appointmentId: appointment.id }
 }
@@ -362,4 +379,63 @@ export async function deleteBlockedTime(
   const { error } = await supabase.from('professional_blocked_times').delete().eq('id', id)
   if (error) return { success: false, error: 'Erro ao remover bloqueio.' }
   return { success: true }
+}
+
+// ─── E-mail de confirmação ────────────────────────────────────────────────────
+
+async function sendBookingConfirmationEmail(params: {
+  tenantId: string
+  clientName: string
+  clientEmail: string
+  serviceName: string
+  professionalId: string
+  startUtc: string
+  price: number
+  appointmentId: string
+}) {
+  const resend = getResend()
+  if (!resend) return // chave não configurada
+
+  const supabase = await createClient()
+
+  // Busca dados do tenant e profissional em paralelo
+  const [{ data: tenant }, { data: professional }] = await Promise.all([
+    supabase.from('tenants').select('name, logo_url, slug, cancellation_policy_hours').eq('id', params.tenantId).single(),
+    supabase.from('professionals').select('name').eq('id', params.professionalId).single(),
+  ])
+
+  if (!tenant) return
+
+  const startDate = new Date(params.startUtc)
+  const dateLabel = startDate.toLocaleDateString('pt-BR', {
+    weekday: 'short', day: 'numeric', month: 'short', timeZone: TIMEZONE,
+  })
+  const timeLabel = startDate.toLocaleTimeString('pt-BR', {
+    hour: '2-digit', minute: '2-digit', timeZone: TIMEZONE,
+  })
+  const priceLabel = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(params.price)
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agendou.com.br'
+  const appointmentUrl = `${appUrl}/${tenant.slug}/meus-agendamentos`
+
+  const emailParams = {
+    businessName: tenant.name,
+    logoUrl: tenant.logo_url,
+    clientName: params.clientName,
+    serviceName: params.serviceName,
+    professionalName: professional?.name ?? '',
+    date: dateLabel,
+    time: timeLabel,
+    price: priceLabel,
+    cancellationPolicy: tenant.cancellation_policy_hours,
+    appointmentUrl,
+  }
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: params.clientEmail,
+    subject: `Agendamento confirmado — ${tenant.name}`,
+    html: bookingConfirmationHtml(emailParams),
+    text: bookingConfirmationText(emailParams),
+  })
 }
