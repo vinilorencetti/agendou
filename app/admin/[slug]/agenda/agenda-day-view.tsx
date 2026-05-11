@@ -58,11 +58,13 @@ function fmtDay(dateStr: string) {
   })
 }
 
+type ClientOption = { id: string; full_name: string; phone: string | null; email: string | null }
+
 export default function AgendaDayView({
-  date, today, appointments, professionals, services, tenantId, slug,
+  date, today, appointments, professionals, services, clients, tenantId, slug,
 }: {
   date: string; today: string; appointments: Appointment[]
-  professionals: Professional[]; services: Service[]; tenantId: string; slug: string
+  professionals: Professional[]; services: Service[]; clients: ClientOption[]; tenantId: string; slug: string
 }) {
   const router = useRouter()
   const hours = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR }, (_, i) => DAY_START_HOUR + i)
@@ -259,6 +261,7 @@ export default function AgendaDayView({
         tenantId={tenantId}
         professionals={professionals}
         services={services}
+        clients={clients}
         defaultDate={date}
       />
       <BlockTimeModal

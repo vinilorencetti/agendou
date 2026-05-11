@@ -238,7 +238,9 @@ export type ManualBookingInput = {
   serviceId: string
   startUtc: string
   endUtc: string
-  clientName: string
+  // Ou clientId existente, ou dados para criar novo
+  clientId?: string
+  clientName?: string
   clientPhone?: string
   internalNotes?: string
 }
@@ -271,22 +273,43 @@ export async function createManualBooking(
     return { success: false, error: 'Já existe um agendamento neste horário.' }
   }
 
-  // Cria ou busca cliente
-  const { data: client } = await supabase
-    .from('clients')
-    .insert({
-      tenant_id: input.tenantId,
-      full_name: input.clientName,
-      phone: input.clientPhone ?? null,
-    })
-    .select('id')
-    .single()
+  let clientId: string
+  let clientDisplayName: string
 
-  if (!client) return { success: false, error: 'Erro ao criar cliente.' }
+  if (input.clientId) {
+    // Usa cliente existente
+    const { data: existing } = await supabase
+      .from('clients')
+      .select('id, full_name')
+      .eq('id', input.clientId)
+      .eq('tenant_id', input.tenantId)
+      .single()
+
+    if (!existing) return { success: false, error: 'Cliente não encontrado.' }
+    clientId = existing.id
+    clientDisplayName = existing.full_name
+  } else {
+    // Cria novo cliente (nome obrigatório)
+    if (!input.clientName?.trim()) return { success: false, error: 'Nome do cliente é obrigatório.' }
+
+    const { data: newClient, error: clientError } = await supabase
+      .from('clients')
+      .insert({
+        tenant_id: input.tenantId,
+        full_name: input.clientName.trim(),
+        phone: input.clientPhone?.trim() || null,
+      })
+      .select('id')
+      .single()
+
+    if (clientError || !newClient) return { success: false, error: 'Erro ao criar cliente.' }
+    clientId = newClient.id
+    clientDisplayName = input.clientName.trim()
+  }
 
   const { error } = await supabase.from('appointments').insert({
     tenant_id: input.tenantId,
-    client_id: client.id,
+    client_id: clientId,
     professional_id: input.professionalId,
     service_id: input.serviceId,
     status: 'confirmed',
@@ -304,7 +327,7 @@ export async function createManualBooking(
     professional_id: input.professionalId,
     type: 'income',
     status: 'pending',
-    description: `${service.name} — ${input.clientName}`,
+    description: `${service.name} — ${clientDisplayName}`,
     amount: service.price,
     due_date: input.startUtc.split('T')[0],
     category: 'service',

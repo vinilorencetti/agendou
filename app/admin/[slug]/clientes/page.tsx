@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getTenantBySlug } from '@/lib/queries/tenants'
+import ClientList from './client-list'
 
 export const metadata: Metadata = { title: 'Clientes' }
 
@@ -24,7 +25,7 @@ export default async function ClientesPage({ params, searchParams }: Props) {
 
   let query = supabase
     .from('clients')
-    .select('id, full_name, phone, email, created_at')
+    .select('id, full_name, phone, email, notes, created_at')
     .eq('tenant_id', tenant.id)
     .order('full_name')
 
@@ -46,12 +47,6 @@ export default async function ClientesPage({ params, searchParams }: Props) {
   const countMap: Record<string, number> = {}
   for (const a of apptCounts ?? []) {
     countMap[a.client_id] = (countMap[a.client_id] ?? 0) + 1
-  }
-
-  function fmtDate(iso: string) {
-    return new Date(iso).toLocaleDateString('pt-BR', {
-      day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo',
-    })
   }
 
   return (
@@ -93,59 +88,20 @@ export default async function ClientesPage({ params, searchParams }: Props) {
       </form>
 
       {/* Lista */}
-      <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
-        {!clients || clients.length === 0 ? (
+      {!clients || clients.length === 0 ? (
+        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
           <p className="py-16 text-center text-sm" style={{ color: 'var(--agendou-text-faint)' }}>
             {q ? 'Nenhum cliente encontrado para essa busca.' : 'Nenhum cliente cadastrado ainda.'}
           </p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs" style={{ borderBottom: '1px solid var(--agendou-border)', backgroundColor: 'var(--agendou-surface-2)' }}>
-                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>Nome</th>
-                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>Telefone</th>
-                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>E-mail</th>
-                <th className="px-4 py-3 font-semibold text-center" style={{ color: 'var(--agendou-text-muted)' }}>Agendamentos</th>
-                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>Desde</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((client, i) => (
-                <tr
-                  key={client.id}
-                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}
-                >
-                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--agendou-text)' }}>{client.full_name}</td>
-                  <td className="px-4 py-3" style={{ color: 'var(--agendou-text-muted)' }}>{client.phone ?? '—'}</td>
-                  <td className="px-4 py-3" style={{ color: 'var(--agendou-text-muted)' }}>{client.email ?? '—'}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span
-                      className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-                      style={countMap[client.id]
-                        ? { backgroundColor: 'rgba(124,58,237,0.2)', color: '#C4B5FD' }
-                        : { color: 'var(--agendou-text-faint)' }
-                      }
-                    >
-                      {countMap[client.id] ?? 0}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{fmtDate(client.created_at)}</td>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/${slug}/clientes/${client.id}`}
-                      className="text-xs font-medium transition-colors"
-                      style={{ color: 'var(--agendou-text-muted)' }}
-                    >
-                      Ver histórico →
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+        </div>
+      ) : (
+        <ClientList
+          clients={clients}
+          countMap={countMap}
+          slug={slug}
+          tenantId={tenant.id}
+        />
+      )}
     </div>
   )
 }

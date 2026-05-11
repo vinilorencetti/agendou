@@ -23,7 +23,7 @@ export default async function AgendaPage({ params, searchParams }: Props) {
 
   const supabase = await createClient()
 
-  const [{ data: appointments }, { data: professionals }, services] = await Promise.all([
+  const [{ data: appointments }, { data: professionals }, services, { data: clients }] = await Promise.all([
     supabase
       .from('appointments')
       .select(`
@@ -45,6 +45,13 @@ export default async function AgendaPage({ params, searchParams }: Props) {
       .order('display_order'),
 
     getServices(tenant.id),
+
+    supabase
+      .from('clients')
+      .select('id, full_name, phone, email')
+      .eq('tenant_id', tenant.id)
+      .order('full_name')
+      .limit(500),
   ])
 
   return (
@@ -56,6 +63,7 @@ export default async function AgendaPage({ params, searchParams }: Props) {
         appointments={appointments ?? []}
         professionals={professionals ?? []}
         services={services}
+        clients={clients ?? []}
         tenantId={tenant.id}
         slug={slug}
       />
