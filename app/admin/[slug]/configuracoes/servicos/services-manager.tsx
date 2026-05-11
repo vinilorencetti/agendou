@@ -84,7 +84,6 @@ export default function ServicesManager({
       return
     }
 
-    // Atualiza lista localmente para feedback imediato
     if (modal === 'create') {
       setServices((prev) => [
         ...prev,
@@ -127,6 +126,13 @@ export default function ServicesManager({
     await toggleServiceActive(service.id, tenantId, next)
   }
 
+  const iconBtnStyle = {
+    color: 'var(--agendou-text-faint)',
+    borderRadius: '0.5rem',
+    padding: '0.375rem',
+    transition: 'all 0.15s',
+  }
+
   return (
     <>
       <div className="mb-4 flex justify-end">
@@ -134,55 +140,48 @@ export default function ServicesManager({
       </div>
 
       {services.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-10 text-center">
-          <p className="text-gray-400">Nenhum serviço cadastrado.</p>
-          <p className="mt-1 text-sm text-gray-400">Clique em "Novo serviço" para começar.</p>
+        <div
+          className="rounded-2xl border-dashed p-10 text-center"
+          style={{ border: '2px dashed var(--agendou-border)' }}
+        >
+          <p style={{ color: 'var(--agendou-text-faint)' }}>Nenhum serviço cadastrado.</p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--agendou-text-faint)' }}>Clique em "Novo serviço" para começar.</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {services.map((service) => (
             <li
               key={service.id}
-              className={`flex items-center justify-between rounded-lg border bg-white p-4 transition-opacity ${!service.is_active ? 'opacity-50' : ''}`}
+              className={`flex items-center justify-between rounded-2xl p-4 transition-opacity ${!service.is_active ? 'opacity-40' : ''}`}
+              style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">{service.name}</p>
+                  <p className="font-semibold" style={{ color: 'var(--agendou-text)' }}>{service.name}</p>
                   {!service.is_active && (
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                    <span
+                      className="rounded-full px-2 py-0.5 text-xs"
+                      style={{ backgroundColor: 'var(--agendou-surface-2)', color: 'var(--agendou-text-faint)' }}
+                    >
                       Inativo
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-sm text-gray-500">
+                <p className="mt-0.5 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
                   {service.duration_min} min ·{' '}
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(service.price)}
                 </p>
                 {service.description && (
-                  <p className="mt-0.5 truncate text-xs text-gray-400">{service.description}</p>
+                  <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{service.description}</p>
                 )}
               </div>
 
               <div className="ml-4 flex items-center gap-1">
-                <button
-                  onClick={() => handleToggle(service)}
-                  title={service.is_active ? 'Desativar' : 'Ativar'}
-                  className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                >
+                <button onClick={() => handleToggle(service)} title={service.is_active ? 'Desativar' : 'Ativar'} style={iconBtnStyle}>
                   {service.is_active ? '👁' : '🚫'}
                 </button>
-                <button
-                  onClick={() => openEdit(service)}
-                  className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                >
-                  ✏️
-                </button>
-                <button
-                  onClick={() => handleDelete(service)}
-                  className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-500"
-                >
-                  🗑
-                </button>
+                <button onClick={() => openEdit(service)} style={iconBtnStyle}>✏️</button>
+                <button onClick={() => handleDelete(service)} style={iconBtnStyle}>🗑</button>
               </div>
             </li>
           ))}
@@ -204,16 +203,21 @@ export default function ServicesManager({
             onChange={set('name')}
           />
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="svc-desc" className="text-sm font-medium text-gray-700">
-              Descrição <span className="font-normal text-gray-400">(opcional)</span>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="svc-desc" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
+              Descrição <span className="font-normal opacity-50">(opcional)</span>
             </label>
             <textarea
               id="svc-desc"
               value={form.description}
               onChange={set('description')}
               rows={2}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+              className="rounded-xl px-4 py-2.5 text-sm outline-none transition-all resize-none"
+              style={{
+                backgroundColor: 'var(--agendou-surface-2)',
+                color: 'var(--agendou-text)',
+                border: '1px solid var(--agendou-border)',
+              }}
             />
           </div>
 
@@ -244,12 +248,14 @@ export default function ServicesManager({
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && (
+            <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+              {error}
+            </p>
+          )}
 
           <div className="flex justify-end gap-2 pt-1">
-            <Button type="button" variant="secondary" onClick={closeModal}>
-              Cancelar
-            </Button>
+            <Button type="button" variant="secondary" onClick={closeModal}>Cancelar</Button>
             <Button type="submit" loading={loading}>
               {modal === 'create' ? 'Criar serviço' : 'Salvar'}
             </Button>

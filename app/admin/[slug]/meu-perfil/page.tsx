@@ -36,8 +36,8 @@ export default async function MeuPerfilPage({ params }: Props) {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 text-xl font-semibold">Meu perfil</h1>
-      <p className="mb-6 text-sm text-gray-500">
+      <h1 className="mb-1 text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Meu perfil</h1>
+      <p className="mb-6 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
         Suas informações visíveis para os clientes e sua agenda de trabalho.
       </p>
       <MyProfileEditor

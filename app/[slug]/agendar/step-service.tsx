@@ -21,9 +21,13 @@ export default function StepService({
           <li key={service.id}>
             <button
               onClick={() => onSelect(service)}
-              className={`w-full rounded-xl border-2 px-4 py-4 text-left transition-all hover:shadow-sm ${
-                selected?.id === service.id ? 'border-[var(--color-brand)]' : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className="w-full rounded-xl px-4 py-4 text-left transition-all"
+              style={{
+                backgroundColor: 'var(--agendou-surface)',
+                border: selected?.id === service.id
+                  ? '2px solid var(--color-brand)'
+                  : '2px solid var(--agendou-border)',
+              }}
             >
               <div className="flex items-center justify-between gap-4">
                 <div>

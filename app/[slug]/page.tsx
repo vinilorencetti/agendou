@@ -39,6 +39,11 @@ export default async function TenantPublicPage({ params }: Props) {
     ? `https://instagram.com/${tenant.instagram.replace('@', '')}`
     : null
 
+  const cardStyle = {
+    backgroundColor: 'var(--agendou-surface)',
+    border: '1px solid var(--agendou-border)',
+  }
+
   // ─── DASHBOARD (autenticado) ──────────────────────────────────────────────
   if (user) {
     const { data: profile } = await supabase
@@ -68,9 +73,9 @@ export default async function TenantPublicPage({ params }: Props) {
 
     const firstName = (profile?.full_name ?? user.email ?? '').split(' ')[0]
 
-    const STATUS: Record<string, { label: string; color: string }> = {
-      confirmed: { label: 'Confirmado', color: 'text-emerald-600 bg-emerald-50' },
-      pending:   { label: 'Pendente',   color: 'text-amber-600 bg-amber-50' },
+    const STATUS: Record<string, { label: string; bg: string; color: string }> = {
+      confirmed: { label: 'Confirmado', bg: 'rgba(59,130,246,0.15)',  color: '#60A5FA' },
+      pending:   { label: 'Pendente',   bg: 'rgba(234,179,8,0.15)',   color: '#FACC15' },
     }
 
     return (
@@ -80,7 +85,6 @@ export default async function TenantPublicPage({ params }: Props) {
           className="relative overflow-hidden px-5 pb-8 pt-12"
           style={{ background: `linear-gradient(135deg, var(--color-brand) 0%, color-mix(in srgb, var(--color-brand) 80%, black) 100%)` }}
         >
-          {/* Decorativo */}
           <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full opacity-10"
             style={{ backgroundColor: 'var(--color-brand-foreground)' }} />
           <div className="absolute -bottom-6 -left-6 h-28 w-28 rounded-full opacity-10"
@@ -113,7 +117,7 @@ export default async function TenantPublicPage({ params }: Props) {
           {/* ── CTA Agendar ── */}
           <a
             href={`/${slug}/agendar`}
-            className="flex w-full items-center justify-center gap-2.5 rounded-2xl py-4 text-[15px] font-bold shadow-lg shadow-black/10 transition-all active:scale-[0.98] hover:shadow-xl"
+            className="flex w-full items-center justify-center gap-2.5 rounded-2xl py-4 text-[15px] font-bold shadow-lg shadow-black/20 transition-all active:scale-[0.98] hover:shadow-xl"
             style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)' }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-5 w-5">
@@ -127,7 +131,7 @@ export default async function TenantPublicPage({ params }: Props) {
           {upcomingAppointments && upcomingAppointments.length > 0 && (
             <section>
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">Próximos</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--agendou-text-faint)' }}>Próximos</h2>
                 <a href={`/${slug}/meus-agendamentos`} className="text-xs font-medium" style={{ color: 'var(--color-brand)' }}>
                   Ver todos →
                 </a>
@@ -141,17 +145,24 @@ export default async function TenantPublicPage({ params }: Props) {
                   const timeLabel = startDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: TIMEZONE })
                   const st = STATUS[appt.status]
                   return (
-                    <li key={appt.id} className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+                    <li key={appt.id} className="flex items-center justify-between rounded-2xl p-4 shadow-sm" style={cardStyle}>
                       <div>
-                        <p className="font-semibold text-gray-900">{service?.name}</p>
-                        <p className="mt-0.5 text-sm text-gray-500">{dateLabel} · {timeLabel}</p>
-                        {pro && <p className="mt-0.5 text-xs text-gray-400">{pro.name}</p>}
+                        <p className="font-semibold" style={{ color: 'var(--agendou-text)' }}>{service?.name}</p>
+                        <p className="mt-0.5 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>{dateLabel} · {timeLabel}</p>
+                        {pro && <p className="mt-0.5 text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{pro.name}</p>}
                       </div>
                       <div className="flex flex-col items-end gap-1.5 shrink-0 ml-3">
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${st?.color ?? 'text-gray-500 bg-gray-100'}`}>
-                          {st?.label ?? appt.status}
+                        {st && (
+                          <span
+                            className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                            style={{ backgroundColor: st.bg, color: st.color }}
+                          >
+                            {st.label}
+                          </span>
+                        )}
+                        <span className="text-sm font-bold" style={{ color: 'var(--color-brand)' }}>
+                          {fmt.format(appt.price_snapshot)}
                         </span>
-                        <span className="text-sm font-bold text-gray-900">{fmt.format(appt.price_snapshot)}</span>
                       </div>
                     </li>
                   )
@@ -163,12 +174,12 @@ export default async function TenantPublicPage({ params }: Props) {
           {/* ── Serviços ── */}
           {services.length > 0 && (
             <section>
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-400">Serviços</h2>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--agendou-text-faint)' }}>Serviços</h2>
               <div className="grid grid-cols-2 gap-2.5">
                 {services.map((service) => (
-                  <div key={service.id} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
-                    <p className="font-semibold text-gray-900 leading-snug">{service.name}</p>
-                    <p className="mt-1 text-xs text-gray-400">{service.duration_min} min</p>
+                  <div key={service.id} className="rounded-2xl p-4 shadow-sm" style={cardStyle}>
+                    <p className="font-semibold leading-snug" style={{ color: 'var(--agendou-text)' }}>{service.name}</p>
+                    <p className="mt-1 text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{service.duration_min} min</p>
                     <p className="mt-2 text-sm font-bold" style={{ color: 'var(--color-brand)' }}>
                       {fmt.format(service.price)}
                     </p>
@@ -181,16 +192,18 @@ export default async function TenantPublicPage({ params }: Props) {
           {/* ── Contato ── */}
           {(whatsappUrl || instagramUrl) && (
             <section>
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-400">Contato</h2>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--agendou-text-faint)' }}>Contato</h2>
               <div className="flex gap-2.5">
                 {whatsappUrl && (
                   <a
                     href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-gray-50"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
+                    style={cardStyle}
                   >
-                    <span className="text-lg">💬</span> WhatsApp
+                    <span className="text-lg">💬</span>
+                    <span style={{ color: 'var(--agendou-text)' }}>WhatsApp</span>
                   </a>
                 )}
                 {instagramUrl && (
@@ -198,9 +211,11 @@ export default async function TenantPublicPage({ params }: Props) {
                     href={instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-gray-50"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
+                    style={cardStyle}
                   >
-                    <span className="text-lg">📸</span> Instagram
+                    <span className="text-lg">📸</span>
+                    <span style={{ color: 'var(--agendou-text)' }}>Instagram</span>
                   </a>
                 )}
               </div>
@@ -254,8 +269,8 @@ export default async function TenantPublicPage({ params }: Props) {
           <div className="mt-7 flex flex-col gap-3">
             <a
               href={`/${slug}/entrar?redirect=/${slug}/agendar`}
-              className="mx-auto block w-full max-w-xs rounded-2xl bg-white py-4 text-[15px] font-bold shadow-lg transition-all hover:shadow-xl active:scale-[0.98]"
-              style={{ color: 'var(--color-brand)' }}
+              className="mx-auto block w-full max-w-xs rounded-2xl py-4 text-[15px] font-bold shadow-lg transition-all hover:shadow-xl active:scale-[0.98]"
+              style={{ backgroundColor: 'var(--agendou-surface)', color: 'var(--color-brand)' }}
             >
               Entrar e agendar
             </a>
@@ -274,19 +289,20 @@ export default async function TenantPublicPage({ params }: Props) {
         {/* Serviços */}
         {services.length > 0 && (
           <section>
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-400">Nossos serviços</h2>
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--agendou-text-faint)' }}>Nossos serviços</h2>
             <ul className="space-y-2">
               {services.map((service) => (
                 <li
                   key={service.id}
-                  className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                  className="flex items-center justify-between rounded-2xl p-4 shadow-sm"
+                  style={cardStyle}
                 >
                   <div>
-                    <p className="font-semibold text-gray-900">{service.name}</p>
+                    <p className="font-semibold" style={{ color: 'var(--agendou-text)' }}>{service.name}</p>
                     {service.description && (
-                      <p className="mt-0.5 text-xs text-gray-400">{service.description}</p>
+                      <p className="mt-0.5 text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{service.description}</p>
                     )}
-                    <p className="mt-0.5 text-xs text-gray-400">{service.duration_min} min</p>
+                    <p className="mt-0.5 text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{service.duration_min} min</p>
                   </div>
                   <span className="shrink-0 ml-4 text-sm font-bold" style={{ color: 'var(--color-brand)' }}>
                     {fmt.format(service.price)}
@@ -300,24 +316,24 @@ export default async function TenantPublicPage({ params }: Props) {
         {/* Profissionais */}
         {professionals.length > 0 && (
           <section>
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-400">Nossa equipe</h2>
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--agendou-text-faint)' }}>Nossa equipe</h2>
             <ul className="space-y-2">
               {professionals.map((pro) => (
-                <li key={pro.id} className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+                <li key={pro.id} className="flex items-center gap-3 rounded-2xl p-4 shadow-sm" style={cardStyle}>
                   {pro.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={pro.avatar_url} alt={pro.name} className="h-11 w-11 rounded-full object-cover" />
                   ) : (
                     <div
                       className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                      style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)', opacity: 0.85 }}
+                      style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)' }}
                     >
                       {pro.name[0]}
                     </div>
                   )}
                   <div>
-                    <p className="font-semibold text-gray-900">{pro.name}</p>
-                    {pro.bio && <p className="text-xs text-gray-400">{pro.bio}</p>}
+                    <p className="font-semibold" style={{ color: 'var(--agendou-text)' }}>{pro.name}</p>
+                    {pro.bio && <p className="text-xs" style={{ color: 'var(--agendou-text-muted)' }}>{pro.bio}</p>}
                   </div>
                 </li>
               ))}
@@ -333,9 +349,11 @@ export default async function TenantPublicPage({ params }: Props) {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-gray-50"
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
+                style={cardStyle}
               >
-                <span className="text-lg">💬</span> WhatsApp
+                <span className="text-lg">💬</span>
+                <span style={{ color: 'var(--agendou-text)' }}>WhatsApp</span>
               </a>
             )}
             {instagramUrl && (
@@ -343,9 +361,11 @@ export default async function TenantPublicPage({ params }: Props) {
                 href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-gray-50"
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-colors"
+                style={cardStyle}
               >
-                <span className="text-lg">📸</span> Instagram
+                <span className="text-lg">📸</span>
+                <span style={{ color: 'var(--agendou-text)' }}>Instagram</span>
               </a>
             )}
           </div>

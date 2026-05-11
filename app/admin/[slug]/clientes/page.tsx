@@ -34,7 +34,6 @@ export default async function ClientesPage({ params, searchParams }: Props) {
 
   const { data: clients } = await query.limit(100)
 
-  // Conta agendamentos por cliente
   const clientIds = (clients ?? []).map((c) => c.id)
   const { data: apptCounts } = clientIds.length > 0
     ? await supabase
@@ -57,8 +56,8 @@ export default async function ClientesPage({ params, searchParams }: Props) {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold">Clientes</h1>
-      <p className="mb-6 text-sm text-gray-500">
+      <h1 className="mb-1 text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Clientes</h1>
+      <p className="mb-6 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
         {clients?.length ?? 0} cliente{clients?.length !== 1 ? 's' : ''} cadastrado{clients?.length !== 1 ? 's' : ''}.
       </p>
 
@@ -68,55 +67,76 @@ export default async function ClientesPage({ params, searchParams }: Props) {
           name="q"
           defaultValue={q ?? ''}
           placeholder="Buscar por nome, telefone ou e-mail..."
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+          className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
+          style={{
+            backgroundColor: 'var(--agendou-surface)',
+            color: 'var(--agendou-text)',
+            border: '1px solid var(--agendou-border)',
+          }}
         />
-        <button type="submit"
-          className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+        <button
+          type="submit"
+          className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+          style={{ background: 'var(--agendou-gradient)' }}
+        >
           Buscar
         </button>
         {q && (
-          <Link href={`/admin/${slug}/clientes`}
-            className="rounded-lg border px-4 py-2 text-sm text-gray-500 hover:bg-gray-50">
+          <Link
+            href={`/admin/${slug}/clientes`}
+            className="rounded-xl px-4 py-2.5 text-sm transition-colors"
+            style={{ color: 'var(--agendou-text-muted)', backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
+          >
             Limpar
           </Link>
         )}
       </form>
 
       {/* Lista */}
-      <div className="rounded-xl border bg-white overflow-hidden">
+      <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
         {!clients || clients.length === 0 ? (
-          <p className="py-16 text-center text-sm text-gray-400">
+          <p className="py-16 text-center text-sm" style={{ color: 'var(--agendou-text-faint)' }}>
             {q ? 'Nenhum cliente encontrado para essa busca.' : 'Nenhum cliente cadastrado ainda.'}
           </p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
-                <th className="px-4 py-3 font-medium">Nome</th>
-                <th className="px-4 py-3 font-medium">Telefone</th>
-                <th className="px-4 py-3 font-medium">E-mail</th>
-                <th className="px-4 py-3 font-medium text-center">Agendamentos</th>
-                <th className="px-4 py-3 font-medium">Desde</th>
+              <tr className="text-left text-xs" style={{ borderBottom: '1px solid var(--agendou-border)', backgroundColor: 'var(--agendou-surface-2)' }}>
+                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>Nome</th>
+                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>Telefone</th>
+                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>E-mail</th>
+                <th className="px-4 py-3 font-semibold text-center" style={{ color: 'var(--agendou-text-muted)' }}>Agendamentos</th>
+                <th className="px-4 py-3 font-semibold" style={{ color: 'var(--agendou-text-muted)' }}>Desde</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y">
-              {clients.map((client) => (
-                <tr key={client.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium">{client.full_name}</td>
-                  <td className="px-4 py-3 text-gray-500">{client.phone ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{client.email ?? '—'}</td>
+            <tbody>
+              {clients.map((client, i) => (
+                <tr
+                  key={client.id}
+                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}
+                >
+                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--agendou-text)' }}>{client.full_name}</td>
+                  <td className="px-4 py-3" style={{ color: 'var(--agendou-text-muted)' }}>{client.phone ?? '—'}</td>
+                  <td className="px-4 py-3" style={{ color: 'var(--agendou-text-muted)' }}>{client.email ?? '—'}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                      countMap[client.id] ? 'bg-blue-50 text-blue-700' : 'text-gray-400'
-                    }`}>
+                    <span
+                      className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                      style={countMap[client.id]
+                        ? { backgroundColor: 'rgba(124,58,237,0.2)', color: '#C4B5FD' }
+                        : { color: 'var(--agendou-text-faint)' }
+                      }
+                    >
                       {countMap[client.id] ?? 0}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{fmtDate(client.created_at)}</td>
+                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{fmtDate(client.created_at)}</td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/${slug}/clientes/${client.id}`}
-                      className="text-xs font-medium text-gray-500 hover:text-black hover:underline">
+                    <Link
+                      href={`/admin/${slug}/clientes/${client.id}`}
+                      className="text-xs font-medium transition-colors"
+                      style={{ color: 'var(--agendou-text-muted)' }}
+                    >
                       Ver histórico →
                     </Link>
                   </td>

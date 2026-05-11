@@ -71,10 +71,11 @@ export default function BlockTimeModal({
   return (
     <Modal open={open} onClose={onClose} title="Bloquear horário">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Profissional</label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>Profissional</label>
           <select value={form.professionalId} onChange={set('professionalId')}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black">
+            className="rounded-xl px-3 py-2.5 text-sm outline-none transition-all"
+            style={{ backgroundColor: 'var(--agendou-surface-2)', color: 'var(--agendou-text)', border: '1px solid var(--agendou-border)' }}>
             {professionals.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
@@ -88,7 +89,11 @@ export default function BlockTimeModal({
 
         <Input id="bt-reason" label="Motivo" placeholder="Ex: Almoço, compromisso pessoal..." value={form.reason} onChange={set('reason')} />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+            {error}
+          </p>
+        )}
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>

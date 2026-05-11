@@ -30,10 +30,16 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
     router.refresh()
   }
 
+  const inputStyle = {
+    backgroundColor: 'var(--agendou-surface-2)',
+    color: 'var(--agendou-text)',
+    border: '1px solid var(--agendou-border)',
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="email" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
           E-mail
         </label>
         <input
@@ -43,12 +49,22 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+          placeholder="seu@email.com"
+          className="rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
+          style={inputStyle}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = 'var(--agendou-border-purple)'
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)'
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'var(--agendou-border)'
+            e.currentTarget.style.boxShadow = ''
+          }}
         />
       </div>
 
-      <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="password" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
           Senha
         </label>
         <input
@@ -58,23 +74,38 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+          placeholder="••••••••"
+          className="rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
+          style={inputStyle}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = 'var(--agendou-border-purple)'
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)'
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'var(--agendou-border)'
+            e.currentTarget.style.boxShadow = ''
+          }}
         />
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && (
+        <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+          {error}
+        </p>
+      )}
 
       <button
         type="submit"
         disabled={loading}
-        className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        className="mt-1 w-full rounded-xl py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/30 transition-all active:scale-[0.98] disabled:opacity-50"
+        style={{ background: 'var(--agendou-gradient)' }}
       >
         {loading ? 'Entrando...' : 'Entrar'}
       </button>
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
         Não tem conta?{' '}
-        <a href="/cadastro" className="underline">
+        <a href="/cadastro" className="font-medium underline" style={{ color: 'var(--color-brand-secondary)' }}>
           Cadastre seu negócio
         </a>
       </p>

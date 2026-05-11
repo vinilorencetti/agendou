@@ -13,8 +13,8 @@ export default async function AparenciaPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold">Aparência</h1>
-      <p className="mb-6 text-sm text-gray-500">
+      <h1 className="mb-1 text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Aparência</h1>
+      <p className="mb-6 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
         Personalize como seus clientes veem a página do seu negócio.
       </p>
       <AppearanceEditor tenant={tenant} />

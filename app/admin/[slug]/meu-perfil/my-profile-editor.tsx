@@ -28,6 +28,12 @@ type DayState = {
   breakEnd: string
 }
 
+const timeInputStyle = {
+  backgroundColor: 'var(--agendou-surface)',
+  color: 'var(--agendou-text)',
+  border: '1px solid var(--agendou-border)',
+}
+
 export default function MyProfileEditor({
   professional,
   services,
@@ -116,14 +122,19 @@ export default function MyProfileEditor({
     setScheduleLoading(false)
   }
 
+  const cardStyle = {
+    backgroundColor: 'var(--agendou-surface)',
+    border: '1px solid var(--agendou-border)',
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {/* Perfil */}
-      <div className="rounded-xl border bg-white p-6">
-        <h2 className="mb-4 font-semibold">Informações pessoais</h2>
+      <div className="rounded-2xl p-6" style={cardStyle}>
+        <h2 className="mb-4 font-semibold" style={{ color: 'var(--agendou-text)' }}>Informações pessoais</h2>
         <form onSubmit={saveProfile} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <p className="text-sm font-medium text-gray-700">Foto de perfil</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>Foto de perfil</p>
             <ImageUpload
               bucket="avatars"
               path={`${tenantId}/${professional.id}`}
@@ -138,28 +149,31 @@ export default function MyProfileEditor({
             onChange={(e) => { setProfile((p) => ({ ...p, name: e.target.value })); setProfileSaved(false) }}
           />
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="mp-bio" className="text-sm font-medium text-gray-700">
-              Bio <span className="font-normal text-gray-400">(opcional — aparece para os clientes)</span>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="mp-bio" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
+              Bio <span className="font-normal opacity-50">(opcional — aparece para os clientes)</span>
             </label>
             <textarea id="mp-bio" rows={2} value={profile.bio}
               onChange={(e) => { setProfile((p) => ({ ...p, bio: e.target.value })); setProfileSaved(false) }}
               placeholder="Ex: Especialista em degradê e barba clássica"
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+              className="rounded-xl px-4 py-2.5 text-sm outline-none transition-all resize-none"
+              style={{ backgroundColor: 'var(--agendou-surface-2)', color: 'var(--agendou-text)', border: '1px solid var(--agendou-border)' }}
             />
           </div>
 
           {services.length > 0 && (
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-gray-700">Serviços que executo</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>Serviços que executo</p>
               <div className="flex flex-wrap gap-2">
                 {services.map((svc) => {
                   const checked = profile.serviceIds.includes(svc.id)
                   return (
                     <button key={svc.id} type="button" onClick={() => toggleService(svc.id)}
-                      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                        checked ? 'border-black bg-black text-white' : 'border-gray-300 text-gray-600 hover:border-gray-400'
-                      }`}>
+                      className="rounded-full px-3 py-1 text-xs transition-all"
+                      style={checked
+                        ? { background: 'var(--agendou-gradient)', color: '#fff', border: '1px solid transparent' }
+                        : { backgroundColor: 'var(--agendou-surface-2)', color: 'var(--agendou-text-muted)', border: '1px solid var(--agendou-border)' }
+                      }>
                       {svc.name}
                     </button>
                   )
@@ -168,19 +182,23 @@ export default function MyProfileEditor({
             </div>
           )}
 
-          {profileError && <p className="text-sm text-red-500">{profileError}</p>}
+          {profileError && (
+            <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+              {profileError}
+            </p>
+          )}
 
           <div className="flex items-center gap-3">
             <Button type="submit" loading={profileLoading}>Salvar perfil</Button>
-            {profileSaved && <span className="text-sm text-green-600">✓ Salvo</span>}
+            {profileSaved && <span className="text-sm" style={{ color: '#4ADE80' }}>✓ Salvo</span>}
           </div>
         </form>
       </div>
 
       {/* Horários */}
-      <div className="rounded-xl border bg-white p-6">
-        <h2 className="mb-1 font-semibold">Meus horários de trabalho</h2>
-        <p className="mb-4 text-xs text-gray-500">
+      <div className="rounded-2xl p-6" style={cardStyle}>
+        <h2 className="mb-1 font-semibold" style={{ color: 'var(--agendou-text)' }}>Meus horários de trabalho</h2>
+        <p className="mb-4 text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
           Configure quando você está disponível para atendimento e seus intervalos.
         </p>
 
@@ -188,15 +206,22 @@ export default function MyProfileEditor({
           {DAY_ORDER.map((day) => {
             const d = days[day]
             return (
-              <div key={day} className="rounded-lg border p-3">
+              <div key={day} className="rounded-xl p-3" style={{ backgroundColor: 'var(--agendou-surface-2)', border: '1px solid var(--agendou-border)' }}>
                 <div className="flex items-center gap-3">
                   {/* Toggle ativo/folga */}
                   <button type="button" onClick={() => setDay(day, { isWorking: !d.isWorking })}
-                    className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${d.isWorking ? 'bg-black' : 'bg-gray-200'}`}>
-                    <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${d.isWorking ? 'left-[18px]' : 'left-0.5'}`} />
+                    className="relative h-5 w-9 shrink-0 rounded-full transition-all"
+                    style={{ background: d.isWorking ? 'var(--agendou-gradient)' : 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
+                    <span
+                      className="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all"
+                      style={{ left: d.isWorking ? '18px' : '2px' }}
+                    />
                   </button>
 
-                  <span className={`w-20 text-sm font-medium ${d.isWorking ? '' : 'text-gray-400'}`}>
+                  <span
+                    className="w-20 text-sm"
+                    style={{ color: d.isWorking ? 'var(--agendou-text)' : 'var(--agendou-text-faint)', fontWeight: d.isWorking ? 500 : 400 }}
+                  >
                     {DAY_LABELS[day]}
                   </span>
 
@@ -204,21 +229,23 @@ export default function MyProfileEditor({
                     <div className="flex items-center gap-2 text-sm">
                       <input type="time" value={d.startTime}
                         onChange={(e) => setDay(day, { startTime: e.target.value })}
-                        className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black" />
-                      <span className="text-gray-400">às</span>
+                        className="rounded-lg px-2 py-1 text-sm outline-none"
+                        style={timeInputStyle} />
+                      <span style={{ color: 'var(--agendou-text-faint)' }}>às</span>
                       <input type="time" value={d.endTime}
                         onChange={(e) => setDay(day, { endTime: e.target.value })}
-                        className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black" />
+                        className="rounded-lg px-2 py-1 text-sm outline-none"
+                        style={timeInputStyle} />
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-400">Folga</span>
+                    <span className="text-sm" style={{ color: 'var(--agendou-text-faint)' }}>Folga</span>
                   )}
                 </div>
 
                 {/* Intervalo */}
                 {d.isWorking && (
                   <div className="ml-12 mt-2">
-                    <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: 'var(--agendou-text-muted)' }}>
                       <input type="checkbox" checked={d.hasBreak}
                         onChange={(e) => setDay(day, { hasBreak: e.target.checked })}
                         className="rounded" />
@@ -226,14 +253,16 @@ export default function MyProfileEditor({
                     </label>
                     {d.hasBreak && (
                       <div className="mt-2 flex items-center gap-2 text-sm">
-                        <span className="text-xs text-gray-500">Das</span>
+                        <span className="text-xs" style={{ color: 'var(--agendou-text-faint)' }}>Das</span>
                         <input type="time" value={d.breakStart}
                           onChange={(e) => setDay(day, { breakStart: e.target.value })}
-                          className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black" />
-                        <span className="text-xs text-gray-500">às</span>
+                          className="rounded-lg px-2 py-1 text-sm outline-none"
+                          style={timeInputStyle} />
+                        <span className="text-xs" style={{ color: 'var(--agendou-text-faint)' }}>às</span>
                         <input type="time" value={d.breakEnd}
                           onChange={(e) => setDay(day, { breakEnd: e.target.value })}
-                          className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black" />
+                          className="rounded-lg px-2 py-1 text-sm outline-none"
+                          style={timeInputStyle} />
                       </div>
                     )}
                   </div>
@@ -243,11 +272,15 @@ export default function MyProfileEditor({
           })}
         </div>
 
-        {scheduleError && <p className="mt-3 text-sm text-red-500">{scheduleError}</p>}
+        {scheduleError && (
+          <p className="mt-3 rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+            {scheduleError}
+          </p>
+        )}
 
         <div className="mt-4 flex items-center gap-3">
           <Button onClick={saveSchedule} loading={scheduleLoading}>Salvar horários</Button>
-          {scheduleSaved && <span className="text-sm text-green-600">✓ Salvo</span>}
+          {scheduleSaved && <span className="text-sm" style={{ color: '#4ADE80' }}>✓ Salvo</span>}
         </div>
       </div>
     </div>

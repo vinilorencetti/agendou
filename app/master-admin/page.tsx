@@ -49,7 +49,7 @@ export default async function MasterAdminPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-2xl font-bold">Visão geral</h1>
-        <p className="mt-1 text-sm text-gray-400">Métricas globais da plataforma Agendou.</p>
+        <p className="mt-1 text-sm text-agendou-muted">Métricas globais da plataforma Agendou.</p>
       </div>
 
       {/* Cards */}
@@ -61,7 +61,7 @@ export default async function MasterAdminPage() {
           { label: 'Receita total (paga)', value: fmt.format(totalRevenue), color: 'text-emerald-400' },
         ].map((c) => (
           <div key={c.label} className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs text-gray-400">{c.label}</p>
+            <p className="text-xs text-agendou-muted">{c.label}</p>
             <p className={`mt-1 text-2xl font-bold ${c.color ?? 'text-white'}`}>{c.value}</p>
           </div>
         ))}
@@ -71,13 +71,13 @@ export default async function MasterAdminPage() {
       <div className="rounded-xl border border-white/10 bg-white/5">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <h2 className="font-semibold">Tenants recentes</h2>
-          <Link href="/master-admin/tenants" className="text-xs text-gray-400 hover:text-white">
+          <Link href="/master-admin/tenants" className="text-xs text-agendou-muted hover:text-white">
             Ver todos →
           </Link>
         </div>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs text-gray-500">
+            <tr className="border-b border-white/10 text-left text-xs text-agendou-faint">
               <th className="px-5 py-3 font-medium">Nome</th>
               <th className="px-5 py-3 font-medium">Slug</th>
               <th className="px-5 py-3 font-medium">Plano</th>
@@ -91,14 +91,14 @@ export default async function MasterAdminPage() {
                 <td className="px-5 py-3 font-medium">
                   <Link href={`/master-admin/tenants/${t.id}`} className="hover:underline">{t.name}</Link>
                 </td>
-                <td className="px-5 py-3 text-gray-400">{t.slug}</td>
-                <td className="px-5 py-3 text-gray-400 capitalize">{t.plan}</td>
+                <td className="px-5 py-3 text-agendou-muted">{t.slug}</td>
+                <td className="px-5 py-3 text-agendou-muted capitalize">{t.plan}</td>
                 <td className="px-5 py-3">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[t.status] ?? ''}`}>
                     {STATUS_LABELS[t.status] ?? t.status}
                   </span>
                 </td>
-                <td className="px-5 py-3 text-gray-400">{fmtDate(t.created_at)}</td>
+                <td className="px-5 py-3 text-agendou-muted">{fmtDate(t.created_at)}</td>
               </tr>
             ))}
           </tbody>

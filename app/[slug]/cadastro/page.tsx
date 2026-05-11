@@ -38,16 +38,19 @@ export default async function ClientSignupPage({ params, searchParams }: Props) 
             </div>
           )}
           <div>
-            <h1 className="text-xl font-bold">{tenant.name}</h1>
-            <p className="mt-0.5 text-sm text-gray-500">Crie sua conta para agendar</p>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--agendou-text)' }}>{tenant.name}</h1>
+            <p className="mt-0.5 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>Crie sua conta para agendar</p>
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <div
+          className="rounded-2xl p-6 shadow-xl"
+          style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
+        >
           <ClientSignupForm slug={slug} redirectTo={redirectTo} />
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
           Já tem conta?{' '}
           <a
             href={`/${slug}/entrar${redirectTo ? `?redirect=${redirectTo}` : ''}`}

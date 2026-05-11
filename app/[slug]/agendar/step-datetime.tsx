@@ -100,12 +100,11 @@ export default function StepDatetime({
               <button
                 key={d}
                 onClick={() => setDate(d)}
-                className={`flex shrink-0 flex-col items-center rounded-xl px-3 py-2 transition-all ${
-                  isSelected
-                    ? 'text-white shadow-md'
-                    : 'border border-gray-200 hover:border-gray-300'
-                }`}
-                style={isSelected ? { backgroundColor: 'var(--color-brand)' } : undefined}
+                className="flex shrink-0 flex-col items-center rounded-xl px-3 py-2 transition-all"
+                style={isSelected
+                  ? { backgroundColor: 'var(--color-brand)', color: '#fff' }
+                  : { backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }
+                }
               >
                 <span className="text-[10px] font-medium uppercase opacity-70">
                   {isToday ? 'Hoje' : weekDay}
@@ -122,7 +121,7 @@ export default function StepDatetime({
       {/* Slots */}
       {slotState === 'loading' && (
         <div className="flex h-24 items-center justify-center">
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: 'var(--agendou-border)', borderTopColor: 'var(--color-brand)' }} />
         </div>
       )}
 
@@ -160,10 +159,11 @@ export default function StepDatetime({
                       <button
                         key={slot.startUtc}
                         onClick={() => setPickedSlot(slot)}
-                        className={`rounded-lg border-2 py-2 text-sm font-semibold transition-all ${
-                          isSelected ? 'text-white' : 'border-gray-200 hover:border-gray-400'
-                        }`}
-                        style={isSelected ? { backgroundColor: 'var(--color-brand)', borderColor: 'var(--color-brand)' } : undefined}
+                        className="rounded-lg py-2 text-sm font-semibold transition-all"
+                        style={isSelected
+                          ? { backgroundColor: 'var(--color-brand)', borderColor: 'var(--color-brand)', border: '2px solid var(--color-brand)', color: '#fff' }
+                          : { backgroundColor: 'var(--agendou-surface)', border: '2px solid var(--agendou-border)', color: 'var(--agendou-text)' }
+                        }
                       >
                         {slot.label}
                       </button>

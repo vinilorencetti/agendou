@@ -56,9 +56,9 @@ export default function TenantProfileForm({ tenant }: { tenant: Tenant }) {
         onChange={set('name')}
         required
       />
-      <div className="flex flex-col gap-1">
-        <label htmlFor="description" className="text-sm font-medium text-gray-700">
-          Descrição <span className="font-normal text-gray-400">(opcional)</span>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="description" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
+          Descrição <span className="font-normal opacity-50">(opcional)</span>
         </label>
         <textarea
           id="description"
@@ -66,7 +66,12 @@ export default function TenantProfileForm({ tenant }: { tenant: Tenant }) {
           onChange={set('description')}
           rows={2}
           placeholder="Ex: A melhor barbearia do bairro, especializada em cortes masculinos."
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+          className="rounded-xl px-4 py-2.5 text-sm outline-none transition-all resize-none placeholder:opacity-40"
+          style={{
+            backgroundColor: 'var(--agendou-surface-2)',
+            color: 'var(--agendou-text)',
+            border: '1px solid var(--agendou-border)',
+          }}
         />
       </div>
       <Input
@@ -102,13 +107,15 @@ export default function TenantProfileForm({ tenant }: { tenant: Tenant }) {
         onChange={set('cancellationPolicyHours')}
       />
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && (
+        <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+          {error}
+        </p>
+      )}
 
       <div className="flex items-center gap-3">
-        <Button type="submit" loading={loading}>
-          Salvar
-        </Button>
-        {saved && <span className="text-sm text-green-600">✓ Salvo</span>}
+        <Button type="submit" loading={loading}>Salvar</Button>
+        {saved && <span className="text-sm" style={{ color: '#4ADE80' }}>✓ Salvo</span>}
       </div>
     </form>
   )

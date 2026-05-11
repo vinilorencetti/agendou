@@ -40,6 +40,12 @@ function buildInitialState(schedules: Schedule[]): Record<DayOfWeek, DayState> {
   return defaults
 }
 
+const timeInputStyle = {
+  backgroundColor: 'var(--agendou-surface-2)',
+  color: 'var(--agendou-text)',
+  border: '1px solid var(--agendou-border)',
+}
+
 export default function ScheduleEditor({
   professionalId,
   tenantId,
@@ -89,21 +95,26 @@ export default function ScheduleEditor({
         {DAY_ORDER.map((day) => {
           const d = days[day]
           return (
-            <div key={day} className="rounded-lg border p-3">
+            <div key={day} className="rounded-xl p-3" style={{ backgroundColor: 'var(--agendou-surface-2)', border: '1px solid var(--agendou-border)' }}>
               <div className="flex items-center gap-3">
                 {/* Toggle */}
                 <button
                   type="button"
                   onClick={() => setDay(day, { isWorking: !d.isWorking })}
-                  className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${d.isWorking ? 'bg-black' : 'bg-gray-200'}`}
+                  className="relative h-5 w-9 shrink-0 rounded-full transition-all"
+                  style={{ background: d.isWorking ? 'var(--agendou-gradient)' : 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
                 >
                   <span
-                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${d.isWorking ? 'left-[18px]' : 'left-0.5'}`}
+                    className="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all"
+                    style={{ left: d.isWorking ? '18px' : '2px' }}
                   />
                 </button>
 
                 {/* Dia */}
-                <span className={`w-20 text-sm ${d.isWorking ? 'text-gray-800' : 'text-gray-400'}`}>
+                <span
+                  className="w-20 text-sm"
+                  style={{ color: d.isWorking ? 'var(--agendou-text)' : 'var(--agendou-text-faint)', fontWeight: d.isWorking ? 500 : 400 }}
+                >
                   {DAY_LABELS[day]}
                 </span>
 
@@ -114,25 +125,27 @@ export default function ScheduleEditor({
                       type="time"
                       value={d.startTime}
                       onChange={(e) => setDay(day, { startTime: e.target.value })}
-                      className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black"
+                      className="rounded-lg px-2 py-1 text-sm outline-none"
+                      style={timeInputStyle}
                     />
-                    <span className="text-gray-400">às</span>
+                    <span style={{ color: 'var(--agendou-text-faint)' }}>às</span>
                     <input
                       type="time"
                       value={d.endTime}
                       onChange={(e) => setDay(day, { endTime: e.target.value })}
-                      className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black"
+                      className="rounded-lg px-2 py-1 text-sm outline-none"
+                      style={timeInputStyle}
                     />
                   </div>
                 ) : (
-                  <span className="text-sm text-gray-400">Folga</span>
+                  <span className="text-sm" style={{ color: 'var(--agendou-text-faint)' }}>Folga</span>
                 )}
               </div>
 
               {/* Intervalo */}
               {d.isWorking && (
                 <div className="ml-12 mt-2">
-                  <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-500">
+                  <label className="flex cursor-pointer items-center gap-2 text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
                     <input
                       type="checkbox"
                       checked={d.hasBreak}
@@ -143,19 +156,21 @@ export default function ScheduleEditor({
                   </label>
                   {d.hasBreak && (
                     <div className="mt-2 flex items-center gap-2 text-sm">
-                      <span className="text-xs text-gray-500">Das</span>
+                      <span className="text-xs" style={{ color: 'var(--agendou-text-faint)' }}>Das</span>
                       <input
                         type="time"
                         value={d.breakStart}
                         onChange={(e) => setDay(day, { breakStart: e.target.value })}
-                        className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black"
+                        className="rounded-lg px-2 py-1 text-sm outline-none"
+                        style={timeInputStyle}
                       />
-                      <span className="text-xs text-gray-500">às</span>
+                      <span className="text-xs" style={{ color: 'var(--agendou-text-faint)' }}>às</span>
                       <input
                         type="time"
                         value={d.breakEnd}
                         onChange={(e) => setDay(day, { breakEnd: e.target.value })}
-                        className="rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-black"
+                        className="rounded-lg px-2 py-1 text-sm outline-none"
+                        style={timeInputStyle}
                       />
                     </div>
                   )}
@@ -166,7 +181,11 @@ export default function ScheduleEditor({
         })}
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && (
+        <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+          {error}
+        </p>
+      )}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" onClick={onClose}>

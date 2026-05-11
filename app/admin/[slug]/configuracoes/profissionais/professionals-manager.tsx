@@ -111,7 +111,6 @@ export default function ProfessionalsManager({
 
     setLoading(false)
     closeModal()
-    // Revalida via server — a página vai ser re-renderizada pelo next
     window.location.reload()
   }
 
@@ -121,6 +120,11 @@ export default function ProfessionalsManager({
     if (result.success) setProfessionals((prev) => prev.filter((p) => p.id !== pro.id))
   }
 
+  const cardStyle = {
+    backgroundColor: 'var(--agendou-surface)',
+    border: '1px solid var(--agendou-border)',
+  }
+
   return (
     <>
       <div className="mb-4 flex justify-end">
@@ -128,14 +132,14 @@ export default function ProfessionalsManager({
       </div>
 
       {professionals.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-10 text-center">
-          <p className="text-gray-400">Nenhum profissional cadastrado.</p>
-          <p className="mt-1 text-sm text-gray-400">Clique em "Novo profissional" para começar.</p>
+        <div className="rounded-xl p-10 text-center" style={{ ...cardStyle, borderStyle: 'dashed' }}>
+          <p style={{ color: 'var(--agendou-text-faint)' }}>Nenhum profissional cadastrado.</p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--agendou-text-faint)' }}>Clique em "Novo profissional" para começar.</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {professionals.map((pro) => (
-            <li key={pro.id} className="rounded-lg border bg-white p-4">
+            <li key={pro.id} className="rounded-xl p-4" style={cardStyle}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -147,13 +151,16 @@ export default function ProfessionalsManager({
                         className="h-9 w-9 shrink-0 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold">
+                      <div
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+                        style={{ background: 'var(--agendou-gradient)', color: '#fff' }}
+                      >
                         {pro.name[0].toUpperCase()}
                       </div>
                     )}
                     <div>
-                      <p className="font-medium">{pro.name}</p>
-                      {pro.bio && <p className="text-xs text-gray-500">{pro.bio}</p>}
+                      <p className="font-medium" style={{ color: 'var(--agendou-text)' }}>{pro.name}</p>
+                      {pro.bio && <p className="text-xs" style={{ color: 'var(--agendou-text-muted)' }}>{pro.bio}</p>}
                     </div>
                   </div>
 
@@ -162,7 +169,11 @@ export default function ProfessionalsManager({
                       {pro.professional_services.map(({ service_id }) => {
                         const svc = services.find((s) => s.id === service_id)
                         return svc ? (
-                          <span key={service_id} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                          <span
+                            key={service_id}
+                            className="rounded-full px-2 py-0.5 text-xs"
+                            style={{ backgroundColor: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}
+                          >
                             {svc.name}
                           </span>
                         ) : null
@@ -175,19 +186,26 @@ export default function ProfessionalsManager({
                   <button
                     onClick={() => openSchedule(pro)}
                     title="Horários"
-                    className="rounded px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-100"
+                    className="rounded-lg px-2 py-1.5 text-xs transition-colors"
+                    style={{ color: 'var(--agendou-text-muted)', backgroundColor: 'var(--agendou-surface-2)' }}
                   >
                     📅 Horários
                   </button>
                   <button
                     onClick={() => openEdit(pro)}
-                    className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                    className="rounded-lg p-1.5 transition-colors"
+                    style={{ color: 'var(--agendou-text-faint)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--agendou-surface-2)'; e.currentTarget.style.color = 'var(--agendou-text)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--agendou-text-faint)' }}
                   >
                     ✏️
                   </button>
                   <button
                     onClick={() => handleDelete(pro)}
-                    className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-500"
+                    className="rounded-lg p-1.5 transition-colors"
+                    style={{ color: 'var(--agendou-text-faint)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#F87171' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--agendou-text-faint)' }}
                   >
                     🗑
                   </button>
@@ -207,8 +225,8 @@ export default function ProfessionalsManager({
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           {/* Foto do profissional */}
           <div className="flex flex-col gap-1.5">
-            <p className="text-sm font-medium text-gray-700">
-              Foto <span className="font-normal text-gray-400">(opcional)</span>
+            <p className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
+              Foto <span className="font-normal opacity-50">(opcional)</span>
             </p>
             <ImageUpload
               bucket="avatars"
@@ -228,9 +246,10 @@ export default function ProfessionalsManager({
             value={form.name}
             onChange={set('name')}
           />
-          <div className="flex flex-col gap-1">
-            <label htmlFor="pro-bio" className="text-sm font-medium text-gray-700">
-              Bio <span className="font-normal text-gray-400">(opcional)</span>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="pro-bio" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
+              Bio <span className="font-normal opacity-50">(opcional)</span>
             </label>
             <textarea
               id="pro-bio"
@@ -238,9 +257,11 @@ export default function ProfessionalsManager({
               onChange={set('bio')}
               rows={2}
               placeholder="Ex: Especialista em degradê e barba"
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+              className="rounded-xl px-4 py-2.5 text-sm outline-none transition-all resize-none"
+              style={{ backgroundColor: 'var(--agendou-surface-2)', color: 'var(--agendou-text)', border: '1px solid var(--agendou-border)' }}
             />
           </div>
+
           <Input
             id="pro-commission"
             label="Comissão (%)"
@@ -254,7 +275,7 @@ export default function ProfessionalsManager({
 
           {services.length > 0 && (
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-gray-700">Serviços que executa</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>Serviços que executa</p>
               <div className="flex flex-wrap gap-2">
                 {services.map((svc) => {
                   const checked = form.serviceIds.includes(svc.id)
@@ -263,11 +284,11 @@ export default function ProfessionalsManager({
                       key={svc.id}
                       type="button"
                       onClick={() => toggleService(svc.id)}
-                      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                        checked
-                          ? 'border-black bg-black text-white'
-                          : 'border-gray-300 text-gray-600 hover:border-gray-400'
-                      }`}
+                      className="rounded-full px-3 py-1 text-xs transition-all"
+                      style={checked
+                        ? { background: 'var(--agendou-gradient)', color: '#fff', border: '1px solid transparent' }
+                        : { backgroundColor: 'var(--agendou-surface-2)', color: 'var(--agendou-text-muted)', border: '1px solid var(--agendou-border)' }
+                      }
                     >
                       {svc.name}
                     </button>
@@ -277,7 +298,11 @@ export default function ProfessionalsManager({
             </div>
           )}
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && (
+            <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+              {error}
+            </p>
+          )}
 
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="secondary" onClick={closeModal}>

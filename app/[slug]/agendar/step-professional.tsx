@@ -34,9 +34,13 @@ export default function StepProfessional({
           <li key={pro.id}>
             <button
               onClick={() => onSelect(pro)}
-              className={`w-full rounded-xl border-2 px-4 py-4 text-left transition-all hover:shadow-sm ${
-                selected?.id === pro.id ? 'border-[var(--color-brand)]' : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className="w-full rounded-xl px-4 py-4 text-left transition-all"
+              style={{
+                backgroundColor: 'var(--agendou-surface)',
+                border: selected?.id === pro.id
+                  ? '2px solid var(--color-brand)'
+                  : '2px solid var(--agendou-border)',
+              }}
             >
               <div className="flex items-center gap-3">
                 {pro.avatar_url ? (

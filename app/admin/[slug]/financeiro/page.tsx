@@ -50,8 +50,8 @@ export default async function FinanceiroPage({ params, searchParams }: Props) {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold">Financeiro</h1>
-      <p className="mb-6 text-sm text-gray-500">
+      <h1 className="mb-1 text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Financeiro</h1>
+      <p className="mb-6 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
         Receitas, despesas e fluxo de caixa do negócio.
       </p>
       <FinanceiroView

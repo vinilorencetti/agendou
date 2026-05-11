@@ -36,10 +36,25 @@ export default function ClientLoginForm({
     router.refresh()
   }
 
+  const inputBaseStyle = {
+    backgroundColor: 'var(--agendou-surface-2)',
+    color: 'var(--agendou-text)',
+    border: '1px solid var(--agendou-border)',
+  }
+
+  function onFocus(e: React.FocusEvent<HTMLInputElement>) {
+    e.currentTarget.style.borderColor = 'var(--color-brand)'
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(var(--color-brand-rgb),0.15)'
+  }
+  function onBlur(e: React.FocusEvent<HTMLInputElement>) {
+    e.currentTarget.style.borderColor = 'var(--agendou-border)'
+    e.currentTarget.style.boxShadow = ''
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="email" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
           E-mail
         </label>
         <input
@@ -49,12 +64,16 @@ export default function ClientLoginForm({
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition-shadow focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20"
+          placeholder="seu@email.com"
+          className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:opacity-40"
+          style={inputBaseStyle}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium text-gray-700">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="password" className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
           Senha
         </label>
         <input
@@ -64,18 +83,24 @@ export default function ClientLoginForm({
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition-shadow focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20"
+          placeholder="••••••••"
+          className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:opacity-40"
+          style={inputBaseStyle}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+          {error}
+        </p>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="mt-1 w-full rounded-xl py-3 text-sm font-semibold shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-1 w-full rounded-xl py-3 text-sm font-bold shadow-lg transition-all active:scale-[0.98] hover:opacity-90 disabled:opacity-50"
         style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)' }}
       >
         {loading ? (

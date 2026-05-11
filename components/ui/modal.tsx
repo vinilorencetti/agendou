@@ -34,13 +34,15 @@ export default function Modal({ open, onClose, title, children }: Props) {
       ref={dialogRef}
       onClick={handleClick}
       onClose={onClose}
-      className="w-full max-w-lg rounded-xl p-0 shadow-xl backdrop:bg-black/40"
+      className="w-full max-w-lg rounded-2xl p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+      style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)', color: 'var(--agendou-text)' }}
     >
-      <div className="flex items-center justify-between border-b px-6 py-4">
-        <h2 className="font-semibold">{title}</h2>
+      <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--agendou-border)' }}>
+        <h2 className="font-semibold" style={{ color: 'var(--agendou-text)' }}>{title}</h2>
         <button
           onClick={onClose}
-          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+          className="rounded-lg p-1.5 transition-colors hover:bg-white/10"
+          style={{ color: 'var(--agendou-text-muted)' }}
         >
           ✕
         </button>

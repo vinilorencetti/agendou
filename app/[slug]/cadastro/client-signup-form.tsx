@@ -46,7 +46,6 @@ export default function ClientSignupForm({
       return
     }
 
-    // Cria perfil público
     if (data.user) {
       await supabase.from('users').upsert({
         id: data.user.id,
@@ -54,74 +53,64 @@ export default function ClientSignupForm({
       })
     }
 
-    // Se a sessão foi criada imediatamente (sem confirmação de e-mail)
     if (data.session) {
       router.push(redirectTo ?? `/${slug}`)
       router.refresh()
     } else {
-      // Email confirmation required
       router.push(`/${slug}/entrar?msg=confirme-email`)
     }
   }
 
+  const inputStyle = {
+    backgroundColor: 'var(--agendou-surface-2)',
+    color: 'var(--agendou-text)',
+    border: '1px solid var(--agendou-border)',
+  }
+
+  function onFocus(e: React.FocusEvent<HTMLInputElement>) {
+    e.currentTarget.style.borderColor = 'var(--color-brand)'
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(var(--color-brand-rgb),0.15)'
+  }
+  function onBlur(e: React.FocusEvent<HTMLInputElement>) {
+    e.currentTarget.style.borderColor = 'var(--agendou-border)'
+    e.currentTarget.style.boxShadow = ''
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name" className="text-sm font-medium text-gray-700">
-          Seu nome
-        </label>
-        <input
-          id="name"
-          type="text"
-          autoComplete="name"
-          required
-          value={fields.name}
-          onChange={set('name')}
-          placeholder="Como quer ser chamado"
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition-shadow focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">
-          E-mail
-        </label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={fields.email}
-          onChange={set('email')}
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition-shadow focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium text-gray-700">
-          Senha
-        </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={6}
-          value={fields.password}
-          onChange={set('password')}
-          placeholder="Mínimo 6 caracteres"
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition-shadow focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20"
-        />
-      </div>
+      {[
+        { id: 'name', label: 'Seu nome', type: 'text', autoComplete: 'name', placeholder: 'Como quer ser chamado', key: 'name' as const },
+        { id: 'email', label: 'E-mail', type: 'email', autoComplete: 'email', placeholder: 'seu@email.com', key: 'email' as const },
+        { id: 'password', label: 'Senha', type: 'password', autoComplete: 'new-password', placeholder: 'Mínimo 6 caracteres', key: 'password' as const },
+      ].map(({ id, label, key, ...inputProps }) => (
+        <div key={id} className="flex flex-col gap-1.5">
+          <label htmlFor={id} className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
+            {label}
+          </label>
+          <input
+            id={id}
+            required
+            value={fields[key]}
+            onChange={set(key)}
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:opacity-40"
+            style={inputStyle}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            {...inputProps}
+          />
+        </div>
+      ))}
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+          {error}
+        </p>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="mt-1 w-full rounded-xl py-3 text-sm font-semibold shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-1 w-full rounded-xl py-3 text-sm font-bold shadow-lg transition-all active:scale-[0.98] hover:opacity-90 disabled:opacity-50"
         style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)' }}
       >
         {loading ? (

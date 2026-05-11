@@ -60,7 +60,7 @@ export default async function TenantsPage({ searchParams }: Props) {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold">Tenants</h1>
-        <p className="mt-1 text-sm text-gray-400">{tenants?.length ?? 0} negócio{tenants?.length !== 1 ? 's' : ''} encontrado{tenants?.length !== 1 ? 's' : ''}.</p>
+        <p className="mt-1 text-sm text-agendou-muted">{tenants?.length ?? 0} negócio{tenants?.length !== 1 ? 's' : ''} encontrado{tenants?.length !== 1 ? 's' : ''}.</p>
       </div>
 
       {/* Filtros */}
@@ -77,7 +77,8 @@ export default async function TenantsPage({ searchParams }: Props) {
           <option value="cancelled">Cancelados</option>
         </select>
         <button type="submit"
-          className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-100">
+          className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          style={{ background: 'var(--agendou-gradient)' }}>
           Filtrar
         </button>
       </form>
@@ -85,12 +86,12 @@ export default async function TenantsPage({ searchParams }: Props) {
       {/* Tabela */}
       <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
         {!tenants || tenants.length === 0 ? (
-          <p className="py-16 text-center text-sm text-gray-400">Nenhum tenant encontrado.</p>
+          <p className="py-16 text-center text-sm text-agendou-muted">Nenhum tenant encontrado.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs text-gray-500">
+                <tr className="border-b border-white/10 text-left text-xs text-agendou-faint">
                   <th className="px-5 py-3 font-medium">Nome</th>
                   <th className="px-5 py-3 font-medium">Slug</th>
                   <th className="px-5 py-3 font-medium">Plano</th>
@@ -109,19 +110,19 @@ export default async function TenantsPage({ searchParams }: Props) {
                         {t.name}
                       </Link>
                     </td>
-                    <td className="px-5 py-3 text-gray-400">{t.slug}</td>
-                    <td className="px-5 py-3 capitalize text-gray-400">{t.plan}</td>
+                    <td className="px-5 py-3 text-agendou-muted">{t.slug}</td>
+                    <td className="px-5 py-3 capitalize text-agendou-muted">{t.plan}</td>
                     <td className="px-5 py-3">
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[t.status] ?? ''}`}>
                         {STATUS_LABELS[t.status] ?? t.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-center text-gray-400">{proMap[t.id] ?? 0}</td>
-                    <td className="px-5 py-3 text-center text-gray-400">{apptMap[t.id] ?? 0}</td>
-                    <td className="px-5 py-3 text-gray-400">{fmtDate(t.created_at)}</td>
+                    <td className="px-5 py-3 text-center text-agendou-muted">{proMap[t.id] ?? 0}</td>
+                    <td className="px-5 py-3 text-center text-agendou-muted">{apptMap[t.id] ?? 0}</td>
+                    <td className="px-5 py-3 text-agendou-muted">{fmtDate(t.created_at)}</td>
                     <td className="px-5 py-3">
                       <Link href={`/master-admin/tenants/${t.id}`}
-                        className="text-xs text-gray-400 hover:text-white hover:underline">
+                        className="text-xs text-agendou-muted hover:text-white hover:underline">
                         Detalhes →
                       </Link>
                     </td>

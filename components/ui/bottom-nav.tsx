@@ -48,7 +48,10 @@ export default function BottomNav({ slug }: { slug: string }) {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur-sm">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md"
+      style={{ backgroundColor: 'var(--agendou-surface)', borderTop: '1px solid var(--agendou-border)' }}
+    >
       <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
         {items.map((item) => {
           const isActive = item.exactMatch
@@ -59,11 +62,10 @@ export default function BottomNav({ slug }: { slug: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 rounded-xl px-4 py-2 text-xs font-medium transition-colors ${
-                isActive
-                  ? 'text-[var(--color-brand)]'
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className="flex flex-col items-center gap-0.5 rounded-xl px-4 py-2 text-xs font-medium transition-all"
+              style={{
+                color: isActive ? 'var(--color-brand)' : 'var(--agendou-text-faint)',
+              }}
             >
               <span className={`transition-transform ${isActive ? 'scale-110' : ''}`}>
                 {item.icon}

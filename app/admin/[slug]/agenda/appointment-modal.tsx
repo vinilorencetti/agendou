@@ -33,6 +33,15 @@ const STATUS_LABELS: Record<string, string> = {
   completed: 'Concluído', cancelled: 'Cancelado', no_show: 'Não compareceu',
 }
 
+const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
+  confirmed:   { bg: 'rgba(59,130,246,0.15)',  color: '#60A5FA' },
+  pending:     { bg: 'rgba(234,179,8,0.15)',   color: '#FACC15' },
+  in_progress: { bg: 'rgba(34,197,94,0.15)',   color: '#4ADE80' },
+  completed:   { bg: 'rgba(255,255,255,0.08)', color: '#9CA3AF' },
+  cancelled:   { bg: 'rgba(239,68,68,0.15)',   color: '#F87171' },
+  no_show:     { bg: 'rgba(167,139,250,0.15)', color: '#C4B5FD' },
+}
+
 export default function AppointmentModal({
   appointment,
   open,
@@ -65,48 +74,63 @@ export default function AppointmentModal({
   }
 
   const transitions = TRANSITIONS[appointment.status] ?? []
+  const st = STATUS_STYLES[appointment.status]
 
   return (
     <Modal open={open} onClose={onClose} title="Detalhes do agendamento">
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-lg font-semibold">{appointment.services?.name}</p>
-            <p className="text-sm text-gray-500">{appointment.professionals?.name} · {timeRange}</p>
+            <p className="text-lg font-semibold" style={{ color: 'var(--agendou-text)' }}>{appointment.services?.name}</p>
+            <p className="text-sm" style={{ color: 'var(--agendou-text-muted)' }}>{appointment.professionals?.name} · {timeRange}</p>
           </div>
-          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${statusColor(appointment.status)}`}>
+          <span
+            className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+            style={{ backgroundColor: st?.bg ?? 'rgba(255,255,255,0.08)', color: st?.color ?? 'var(--agendou-text-muted)' }}
+          >
             {STATUS_LABELS[appointment.status]}
           </span>
         </div>
 
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-gray-50 p-3 text-sm">
-          <dt className="text-gray-500">Cliente</dt>
-          <dd className="font-medium">{appointment.clients?.full_name}</dd>
+        <dl
+          className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-xl p-3 text-sm"
+          style={{ backgroundColor: 'var(--agendou-surface-2)' }}
+        >
+          <dt style={{ color: 'var(--agendou-text-muted)' }}>Cliente</dt>
+          <dd className="font-medium" style={{ color: 'var(--agendou-text)' }}>{appointment.clients?.full_name}</dd>
           {appointment.clients?.phone && <>
-            <dt className="text-gray-500">Telefone</dt>
-            <dd><a href={`tel:${appointment.clients.phone}`} className="underline">{appointment.clients.phone}</a></dd>
+            <dt style={{ color: 'var(--agendou-text-muted)' }}>Telefone</dt>
+            <dd>
+              <a href={`tel:${appointment.clients.phone}`} className="underline" style={{ color: '#C4B5FD' }}>
+                {appointment.clients.phone}
+              </a>
+            </dd>
           </>}
-          <dt className="text-gray-500">Valor</dt>
-          <dd className="font-medium">{fmt.format(appointment.price_snapshot)}</dd>
+          <dt style={{ color: 'var(--agendou-text-muted)' }}>Valor</dt>
+          <dd className="font-semibold" style={{ color: '#4ADE80' }}>{fmt.format(appointment.price_snapshot)}</dd>
         </dl>
 
         {appointment.notes && (
-          <div className="rounded-lg border-l-2 border-gray-300 pl-3">
-            <p className="text-xs text-gray-400">Observações do cliente</p>
-            <p className="text-sm">{appointment.notes}</p>
+          <div className="rounded-xl pl-3 py-2 pr-3" style={{ borderLeft: '2px solid var(--agendou-border)', backgroundColor: 'var(--agendou-surface-2)' }}>
+            <p className="text-xs" style={{ color: 'var(--agendou-text-faint)' }}>Observações do cliente</p>
+            <p className="text-sm" style={{ color: 'var(--agendou-text)' }}>{appointment.notes}</p>
           </div>
         )}
         {appointment.internal_notes && (
-          <div className="rounded-lg border-l-2 border-amber-300 pl-3">
-            <p className="text-xs text-gray-400">Notas internas</p>
-            <p className="text-sm">{appointment.internal_notes}</p>
+          <div className="rounded-xl pl-3 py-2 pr-3" style={{ borderLeft: '2px solid #D97706', backgroundColor: 'rgba(234,179,8,0.08)' }}>
+            <p className="text-xs" style={{ color: 'var(--agendou-text-faint)' }}>Notas internas</p>
+            <p className="text-sm" style={{ color: 'var(--agendou-text)' }}>{appointment.internal_notes}</p>
           </div>
         )}
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+            {error}
+          </p>
+        )}
 
         {transitions.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t pt-3">
+          <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: '1px solid var(--agendou-border)' }}>
             {transitions.map((t) => (
               <Button
                 key={t.next}
@@ -123,13 +147,4 @@ export default function AppointmentModal({
       </div>
     </Modal>
   )
-}
-
-function statusColor(s: string) {
-  const map: Record<string, string> = {
-    confirmed: 'text-blue-700 bg-blue-50', pending: 'text-amber-700 bg-amber-50',
-    in_progress: 'text-green-700 bg-green-50', completed: 'text-gray-600 bg-gray-100',
-    cancelled: 'text-red-600 bg-red-50', no_show: 'text-purple-700 bg-purple-50',
-  }
-  return map[s] ?? 'text-gray-600 bg-gray-100'
 }

@@ -65,9 +65,9 @@ export default function AppearanceEditor({ tenant }: { tenant: Tenant }) {
       {/* ── Controles ── */}
       <div className="flex flex-col gap-6">
         {/* Logo */}
-        <div className="rounded-xl border bg-white p-5">
-          <h2 className="mb-1 font-semibold">Logo</h2>
-          <p className="mb-4 text-xs text-gray-500">
+        <div className="rounded-2xl p-5" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
+          <h2 className="mb-1 font-semibold" style={{ color: 'var(--agendou-text)' }}>Logo</h2>
+          <p className="mb-4 text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
             Aparece no cabeçalho da página dos seus clientes.
           </p>
           <ImageUpload
@@ -83,9 +83,9 @@ export default function AppearanceEditor({ tenant }: { tenant: Tenant }) {
         </div>
 
         {/* Cores */}
-        <div className="rounded-xl border bg-white p-5">
-          <h2 className="mb-1 font-semibold">Cores</h2>
-          <p className="mb-4 text-xs text-gray-500">
+        <div className="rounded-2xl p-5" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
+          <h2 className="mb-1 font-semibold" style={{ color: 'var(--agendou-text)' }}>Cores</h2>
+          <p className="mb-4 text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
             Aplicadas na página pública dos seus clientes.
           </p>
           <div className="flex flex-col gap-4">
@@ -110,23 +110,26 @@ export default function AppearanceEditor({ tenant }: { tenant: Tenant }) {
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+            {error}
+          </p>
+        )}
 
         <div className="flex items-center gap-3">
-          <Button onClick={handleSave} loading={loading}>
-            Salvar aparência
-          </Button>
-          {saved && <span className="text-sm text-green-600">✓ Salvo</span>}
+          <Button onClick={handleSave} loading={loading}>Salvar aparência</Button>
+          {saved && <span className="text-sm" style={{ color: '#4ADE80' }}>✓ Salvo</span>}
         </div>
       </div>
 
       {/* ── Preview ao vivo ── */}
       <div className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+        <p className="text-xs font-medium uppercase tracking-widest" style={{ color: 'var(--agendou-text-faint)' }}>
           Preview — página do cliente
         </p>
         <div
-          className="overflow-hidden rounded-2xl border shadow-sm"
+          className="overflow-hidden rounded-2xl shadow-sm"
+          style={{ border: '1px solid var(--agendou-border)' }}
           style={{ backgroundColor: state.backgroundColor }}
         >
           {/* Header */}
@@ -202,7 +205,7 @@ export default function AppearanceEditor({ tenant }: { tenant: Tenant }) {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs" style={{ color: 'var(--agendou-text-faint)' }}>
           Este é um preview — a página real pode variar levemente.
         </p>
       </div>

@@ -14,13 +14,13 @@ const STATUS_LABELS: Record<string, string> = {
   confirmed: 'Confirmado', pending: 'Pendente', in_progress: 'Em atendimento',
   completed: 'Concluído', cancelled: 'Cancelado', no_show: 'Não compareceu',
 }
-const STATUS_COLORS: Record<string, string> = {
-  confirmed: 'bg-blue-50 text-blue-700',
-  pending: 'bg-yellow-50 text-yellow-700',
-  in_progress: 'bg-green-50 text-green-700',
-  completed: 'bg-gray-100 text-gray-500',
-  cancelled: 'bg-red-50 text-red-400',
-  no_show: 'bg-purple-50 text-purple-700',
+const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+  confirmed:   { bg: 'rgba(59,130,246,0.15)',  text: '#60A5FA' },
+  pending:     { bg: 'rgba(234,179,8,0.15)',   text: '#FACC15' },
+  in_progress: { bg: 'rgba(34,197,94,0.15)',   text: '#4ADE80' },
+  completed:   { bg: 'rgba(255,255,255,0.08)', text: '#9CA3AF' },
+  cancelled:   { bg: 'rgba(239,68,68,0.15)',   text: '#F87171' },
+  no_show:     { bg: 'rgba(167,139,250,0.15)', text: '#A78BFA' },
 }
 
 const TZ = 'America/Sao_Paulo'
@@ -46,7 +46,6 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
     { data: monthRevenue },
     { count: clientCount },
   ] = await Promise.all([
-    // Agendamentos de hoje com detalhes
     supabase
       .from('appointments')
       .select('id, starts_at, ends_at, status, services(name), professionals(name), clients(full_name)')
@@ -56,7 +55,6 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
       .not('status', 'in', '("cancelled","no_show")')
       .order('starts_at'),
 
-    // Próximos agendamentos (amanhã e depois)
     supabase
       .from('appointments')
       .select('id, starts_at, status, services(name), professionals(name), clients(full_name)')
@@ -66,14 +64,12 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
       .order('starts_at')
       .limit(5),
 
-    // Pendentes de confirmação
     supabase
       .from('appointments')
       .select('*', { count: 'exact', head: true })
       .eq('tenant_id', tenant.id)
       .eq('status', 'pending'),
 
-    // Receita do mês (entradas pagas)
     supabase
       .from('financial_entries')
       .select('amount')
@@ -83,7 +79,6 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
       .gte('due_date', firstOfMonth)
       .lte('due_date', lastOfMonth),
 
-    // Total de clientes
     supabase
       .from('clients')
       .select('*', { count: 'exact', head: true })
@@ -103,69 +98,89 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
   const monthLabel = new Date(year, mon - 1, 15).toLocaleDateString('pt-BR', { month: 'long', timeZone: TZ })
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {welcome === '1' && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-          <p className="font-semibold text-green-800">Bem-vindo ao Agendou!</p>
-          <p className="mt-1 text-sm text-green-700">
+        <div
+          className="rounded-2xl p-4"
+          style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}
+        >
+          <p className="font-semibold" style={{ color: '#4ADE80' }}>🎉 Bem-vindo ao Agendou!</p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
             Seu negócio foi criado com sucesso. Sua página pública já está disponível em{' '}
-            <a href={`/${slug}`} target="_blank" className="underline">agendou.com.br/{slug}</a>.
+            <a href={`/${slug}`} target="_blank" className="underline" style={{ color: '#4ADE80' }}>
+              agendou.com.br/{slug}
+            </a>.
           </p>
         </div>
       )}
 
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Dashboard</h1>
-        <Link href={`/admin/${slug}/agenda`}
-          className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Dashboard</h1>
+        <Link
+          href={`/admin/${slug}/agenda`}
+          className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 transition-all active:scale-[0.98]"
+          style={{ background: 'var(--agendou-gradient)' }}
+        >
           Ver agenda
         </Link>
       </div>
 
-      {/* Cards de resumo */}
+      {/* Stat cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Agendamentos hoje" value={String(todayAppts?.length ?? 0)}
           href={`/admin/${slug}/agenda`} />
         <StatCard label="Pendentes" value={String(pendingCount ?? 0)}
-          valueColor={pendingCount ? 'text-yellow-600' : undefined}
+          valueStyle={pendingCount ? { color: '#FACC15' } : undefined}
           href={`/admin/${slug}/agenda`} />
         <StatCard label={`Receita — ${monthLabel}`} value={fmt.format(totalRevenue)}
-          valueColor="text-green-600"
+          valueStyle={{ color: '#4ADE80' }}
           href={`/admin/${slug}/financeiro`} />
         <StatCard label="Clientes cadastrados" value={String(clientCount ?? 0)}
           href={`/admin/${slug}/clientes`} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         {/* Agenda do dia */}
-        <div className="rounded-xl border bg-white">
-          <div className="flex items-center justify-between border-b px-5 py-4">
-            <h2 className="font-semibold">Hoje</h2>
-            <Link href={`/admin/${slug}/agenda`} className="text-xs text-gray-400 hover:text-black">
+        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
+          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--agendou-border)' }}>
+            <h2 className="font-semibold" style={{ color: 'var(--agendou-text)' }}>Hoje</h2>
+            <Link href={`/admin/${slug}/agenda`} className="text-xs transition-colors" style={{ color: 'var(--agendou-text-faint)' }}>
               Ver agenda →
             </Link>
           </div>
           {!todayAppts || todayAppts.length === 0 ? (
-            <p className="px-5 py-10 text-center text-sm text-gray-400">
+            <p className="px-5 py-10 text-center text-sm" style={{ color: 'var(--agendou-text-faint)' }}>
               Nenhum agendamento para hoje.
             </p>
           ) : (
-            <ul className="divide-y">
-              {todayAppts.map((a) => (
-                <li key={a.id} className="flex items-center gap-3 px-5 py-3">
+            <ul>
+              {todayAppts.map((a, i) => (
+                <li
+                  key={a.id}
+                  className="flex items-center gap-3 px-5 py-3"
+                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}
+                >
                   <div className="w-16 shrink-0 text-center">
-                    <p className="text-sm font-semibold tabular-nums">{fmtTime(a.starts_at)}</p>
-                    <p className="text-[10px] text-gray-400">{fmtTime(a.ends_at)}</p>
+                    <p className="text-sm font-semibold tabular-nums" style={{ color: 'var(--agendou-text)' }}>{fmtTime(a.starts_at)}</p>
+                    <p className="text-[10px]" style={{ color: 'var(--agendou-text-faint)' }}>{fmtTime(a.ends_at)}</p>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{(a.clients as any)?.full_name}</p>
-                    <p className="truncate text-xs text-gray-500">
+                    <p className="truncate text-sm font-medium" style={{ color: 'var(--agendou-text)' }}>{(a.clients as any)?.full_name}</p>
+                    <p className="truncate text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
                       {(a.services as any)?.name} · {(a.professionals as any)?.name}
                     </p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[a.status] ?? ''}`}>
-                    {STATUS_LABELS[a.status]}
-                  </span>
+                  {(() => {
+                    const st = STATUS_COLORS[a.status]
+                    return (
+                      <span
+                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                        style={{ backgroundColor: st?.bg ?? 'rgba(255,255,255,0.08)', color: st?.text ?? 'var(--agendou-text-muted)' }}
+                      >
+                        {STATUS_LABELS[a.status]}
+                      </span>
+                    )
+                  })()}
                 </li>
               ))}
             </ul>
@@ -173,31 +188,43 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
         </div>
 
         {/* Próximos agendamentos */}
-        <div className="rounded-xl border bg-white">
-          <div className="flex items-center justify-between border-b px-5 py-4">
-            <h2 className="font-semibold">Próximos agendamentos</h2>
+        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
+          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--agendou-border)' }}>
+            <h2 className="font-semibold" style={{ color: 'var(--agendou-text)' }}>Próximos agendamentos</h2>
           </div>
           {!upcomingAppts || upcomingAppts.length === 0 ? (
-            <p className="px-5 py-10 text-center text-sm text-gray-400">
+            <p className="px-5 py-10 text-center text-sm" style={{ color: 'var(--agendou-text-faint)' }}>
               Nenhum agendamento futuro.
             </p>
           ) : (
-            <ul className="divide-y">
-              {upcomingAppts.map((a) => (
-                <li key={a.id} className="flex items-center gap-3 px-5 py-3">
+            <ul>
+              {upcomingAppts.map((a, i) => (
+                <li
+                  key={a.id}
+                  className="flex items-center gap-3 px-5 py-3"
+                  style={i > 0 ? { borderTop: '1px solid var(--agendou-border)' } : {}}
+                >
                   <div className="w-24 shrink-0">
-                    <p className="text-xs font-medium capitalize text-gray-500">{fmtDate(a.starts_at)}</p>
-                    <p className="text-sm font-semibold tabular-nums">{fmtTime(a.starts_at)}</p>
+                    <p className="text-xs font-medium capitalize" style={{ color: 'var(--agendou-text-muted)' }}>{fmtDate(a.starts_at)}</p>
+                    <p className="text-sm font-semibold tabular-nums" style={{ color: 'var(--agendou-text)' }}>{fmtTime(a.starts_at)}</p>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{(a.clients as any)?.full_name}</p>
-                    <p className="truncate text-xs text-gray-500">
+                    <p className="truncate text-sm font-medium" style={{ color: 'var(--agendou-text)' }}>{(a.clients as any)?.full_name}</p>
+                    <p className="truncate text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
                       {(a.services as any)?.name} · {(a.professionals as any)?.name}
                     </p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[a.status] ?? ''}`}>
-                    {STATUS_LABELS[a.status]}
-                  </span>
+                  {(() => {
+                    const st = STATUS_COLORS[a.status]
+                    return (
+                      <span
+                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                        style={{ backgroundColor: st?.bg ?? 'rgba(255,255,255,0.08)', color: st?.text ?? 'var(--agendou-text-muted)' }}
+                      >
+                        {STATUS_LABELS[a.status]}
+                      </span>
+                    )
+                  })()}
                 </li>
               ))}
             </ul>
@@ -213,8 +240,13 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
           { label: 'Gerenciar equipe', href: `/admin/${slug}/configuracoes/profissionais`, icon: '👥' },
           { label: 'Ver página pública', href: `/${slug}`, icon: '↗', external: true },
         ].map((s) => (
-          <Link key={s.href} href={s.href} target={s.external ? '_blank' : undefined}
-            className="flex items-center gap-2 rounded-xl border bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <Link
+            key={s.href}
+            href={s.href}
+            target={s.external ? '_blank' : undefined}
+            className="flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-all active:scale-[0.98]"
+            style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-muted)' }}
+          >
             <span>{s.icon}</span>
             {s.label}
           </Link>
@@ -224,13 +256,17 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
   )
 }
 
-function StatCard({ label, value, valueColor, href }: {
-  label: string; value: string; valueColor?: string; href: string
+function StatCard({ label, value, valueStyle, href }: {
+  label: string; value: string; valueStyle?: React.CSSProperties; href: string
 }) {
   return (
-    <Link href={href} className="rounded-xl border bg-white p-4 hover:bg-gray-50 transition-colors block">
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className={`mt-1 text-2xl font-bold ${valueColor ?? 'text-gray-900'}`}>{value}</p>
+    <Link
+      href={href}
+      className="block rounded-2xl p-4 transition-all active:scale-[0.98]"
+      style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
+    >
+      <p className="text-xs" style={{ color: 'var(--agendou-text-faint)' }}>{label}</p>
+      <p className="mt-1.5 text-2xl font-bold" style={{ color: 'var(--agendou-text)', ...valueStyle }}>{value}</p>
     </Link>
   )
 }

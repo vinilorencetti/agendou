@@ -100,7 +100,10 @@ export default function StepClientInfo({
             value={fields.name}
             onChange={set('name')}
             placeholder="Como você quer ser chamado"
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)]"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
+            style={{ backgroundColor: 'var(--agendou-surface)', color: 'var(--agendou-text)', border: '1px solid var(--agendou-border)' }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-brand)' }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--agendou-border)' }}
           />
         </div>
 
@@ -115,7 +118,10 @@ export default function StepClientInfo({
             value={fields.phone}
             onChange={set('phone')}
             placeholder="(11) 99999-9999"
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)]"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
+            style={{ backgroundColor: 'var(--agendou-surface)', color: 'var(--agendou-text)', border: '1px solid var(--agendou-border)' }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-brand)' }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--agendou-border)' }}
           />
         </div>
 
@@ -130,7 +136,10 @@ export default function StepClientInfo({
             value={fields.email}
             onChange={set('email')}
             placeholder="para@receber.confirmação"
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)]"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
+            style={{ backgroundColor: 'var(--agendou-surface)', color: 'var(--agendou-text)', border: '1px solid var(--agendou-border)' }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-brand)' }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--agendou-border)' }}
           />
         </div>
 
@@ -144,11 +153,18 @@ export default function StepClientInfo({
             onChange={set('notes')}
             rows={2}
             placeholder="Ex: prefiro o lado direito, cabelo comprido na frente..."
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)]"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
+            style={{ backgroundColor: 'var(--agendou-surface)', color: 'var(--agendou-text)', border: '1px solid var(--agendou-border)' }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-brand)' }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--agendou-border)' }}
           />
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"

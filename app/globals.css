@@ -4,9 +4,26 @@
 
 @layer base {
   :root {
-    --color-brand: #F97316;
-    --color-brand-secondary: #6b7280;
+    /* Agendou brand — purple dark system */
+    --color-brand: #7C3AED;
+    --color-brand-secondary: #8B5CF6;
     --color-brand-foreground: #ffffff;
+
+    /* Dark surfaces */
+    --agendou-bg: #0D0B12;
+    --agendou-surface: #16131E;
+    --agendou-surface-2: #1E1A2E;
+    --agendou-border: rgba(255,255,255,0.08);
+    --agendou-border-purple: rgba(124,58,237,0.35);
+
+    /* Text */
+    --agendou-text: #F8F7FF;
+    --agendou-text-muted: #A09BB8;
+    --agendou-text-faint: #6B6580;
+
+    /* Brand gradient */
+    --agendou-gradient: linear-gradient(135deg, #4C1D95 0%, #6D28D9 45%, #7C3AED 75%, #8B5CF6 100%);
+    --agendou-gradient-subtle: linear-gradient(135deg, rgba(76,29,149,0.6) 0%, rgba(124,58,237,0.4) 100%);
   }
 
   * {

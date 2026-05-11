@@ -16,7 +16,10 @@ export default function LogoutButton({ slug }: { slug: string }) {
   return (
     <button
       onClick={handleLogout}
-      className="flex w-full items-center justify-between rounded-2xl border border-red-100 bg-white p-4 shadow-sm transition-colors hover:bg-red-50"
+      className="flex w-full items-center justify-between rounded-2xl p-4 transition-colors"
+      style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid rgba(239,68,68,0.2)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--agendou-surface)' }}
     >
       <div className="flex items-center gap-3">
         <span className="text-xl">🚪</span>

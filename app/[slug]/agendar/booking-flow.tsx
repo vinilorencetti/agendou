@@ -92,10 +92,11 @@ export default function BookingFlow({
               return (
                 <div key={s} className="flex flex-1 flex-col items-center gap-1">
                   <div
-                    className={`h-1 w-full rounded-full transition-colors ${
-                      past || active ? '' : 'bg-gray-200'
-                    }`}
-                    style={{ backgroundColor: past || active ? 'var(--color-brand)' : undefined, opacity: active ? 1 : past ? 0.5 : undefined }}
+                    className="h-1 w-full rounded-full transition-all"
+                    style={{
+                      backgroundColor: past || active ? 'var(--color-brand)' : 'var(--agendou-border)',
+                      opacity: active ? 1 : past ? 0.5 : 1,
+                    }}
                   />
                   <span
                     className="text-[10px] font-medium transition-colors"

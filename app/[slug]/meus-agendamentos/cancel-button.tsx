@@ -34,13 +34,15 @@ export default function CancelButton({
   if (confirming) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-gray-600">
+        <p className="text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
           Tem certeza? O cancelamento é definitivo.
           {policyHours > 0 && (
             <> Prazo: até <strong>{deadline}</strong>.</>
           )}
         </p>
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && (
+          <p className="text-xs text-red-400">{error}</p>
+        )}
         <div className="flex gap-2">
           <button
             onClick={handleCancel}
@@ -51,7 +53,8 @@ export default function CancelButton({
           </button>
           <button
             onClick={() => setConfirming(false)}
-            className="rounded-lg border px-3 py-1.5 text-xs"
+            className="rounded-lg px-3 py-1.5 text-xs transition-colors"
+            style={{ border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-muted)' }}
           >
             Não
           </button>

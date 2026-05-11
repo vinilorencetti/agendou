@@ -21,8 +21,8 @@ export default async function ProfissionaisPage({ params }: Props) {
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold">Profissionais</h1>
-        <p className="mt-0.5 text-sm text-gray-500">
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Profissionais</h1>
+        <p className="mt-0.5 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
           {professionals.length} profissional{professionals.length !== 1 ? 'is' : ''} cadastrado{professionals.length !== 1 ? 's' : ''}
         </p>
       </div>

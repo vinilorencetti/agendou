@@ -71,7 +71,7 @@ export default async function TenantDetailPage({ params }: Props) {
     confirmed: 'bg-blue-900/50 text-blue-400',
     pending: 'bg-yellow-900/50 text-yellow-400',
     in_progress: 'bg-green-900/50 text-green-400',
-    completed: 'bg-white/10 text-gray-400',
+    completed: 'bg-white/10 text-agendou-muted',
     cancelled: 'bg-red-900/50 text-red-400',
     no_show: 'bg-purple-900/50 text-purple-400',
   }
@@ -100,7 +100,7 @@ export default async function TenantDetailPage({ params }: Props) {
   return (
     <div className="flex flex-col gap-8 max-w-4xl">
       {/* Voltar */}
-      <Link href="/master-admin/tenants" className="text-sm text-gray-400 hover:text-white">
+      <Link href="/master-admin/tenants" className="text-sm text-agendou-muted hover:text-white">
         ← Voltar para tenants
       </Link>
 
@@ -113,10 +113,10 @@ export default async function TenantDetailPage({ params }: Props) {
               {TENANT_STATUS_LABELS[tenant.status] ?? tenant.status}
             </span>
           </div>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-agendou-muted">
             agendou.com.br/{tenant.slug} · Plano {tenant.plan} · Desde {fmtDate(tenant.created_at)}
           </p>
-          {tenant.phone && <p className="mt-0.5 text-sm text-gray-400">📱 {tenant.phone}</p>}
+          {tenant.phone && <p className="mt-0.5 text-sm text-agendou-muted">📱 {tenant.phone}</p>}
         </div>
 
         {/* Ações de status */}
@@ -132,7 +132,7 @@ export default async function TenantDetailPage({ params }: Props) {
           { label: 'Receita total', value: fmt.format(totalRevenueAll), color: 'text-emerald-300' },
         ].map((c) => (
           <div key={c.label} className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs text-gray-400">{c.label}</p>
+            <p className="text-xs text-agendou-muted">{c.label}</p>
             <p className={`mt-1 text-xl font-bold ${c.color ?? 'text-white'}`}>{c.value}</p>
           </div>
         ))}
@@ -145,13 +145,13 @@ export default async function TenantDetailPage({ params }: Props) {
             <h2 className="font-semibold">Profissionais ({totalPros ?? 0})</h2>
           </div>
           {!professionals || professionals.length === 0 ? (
-            <p className="px-5 py-8 text-sm text-gray-400">Nenhum profissional.</p>
+            <p className="px-5 py-8 text-sm text-agendou-muted">Nenhum profissional.</p>
           ) : (
             <ul className="divide-y divide-white/5">
               {professionals.map((p) => (
                 <li key={p.id} className="flex items-center justify-between px-5 py-3 text-sm">
-                  <span className={p.is_active ? 'text-white' : 'text-gray-500 line-through'}>{p.name}</span>
-                  <span className="text-gray-400">{p.commission_pct}% comissão</span>
+                  <span className={p.is_active ? 'text-white' : 'text-agendou-faint line-through'}>{p.name}</span>
+                  <span className="text-agendou-muted">{p.commission_pct}% comissão</span>
                 </li>
               ))}
             </ul>
@@ -163,7 +163,7 @@ export default async function TenantDetailPage({ params }: Props) {
           <div className="border-b border-white/10 px-5 py-4">
             <h2 className="font-semibold">Clientes ({totalClients ?? 0})</h2>
           </div>
-          <div className="px-5 py-8 text-sm text-gray-400">
+          <div className="px-5 py-8 text-sm text-agendou-muted">
             {totalClients ?? 0} cliente{totalClients !== 1 ? 's' : ''} cadastrado{totalClients !== 1 ? 's' : ''} neste negócio.
           </div>
         </div>
@@ -175,15 +175,15 @@ export default async function TenantDetailPage({ params }: Props) {
           <h2 className="font-semibold">Agendamentos recentes</h2>
         </div>
         {!recentAppts || recentAppts.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-gray-400">Nenhum agendamento.</p>
+          <p className="px-5 py-8 text-sm text-agendou-muted">Nenhum agendamento.</p>
         ) : (
           <table className="w-full text-sm">
             <tbody className="divide-y divide-white/5">
               {recentAppts.map((a) => (
                 <tr key={a.id} className="hover:bg-white/5">
-                  <td className="px-5 py-3 text-gray-400">{fmtDateTime(a.starts_at)}</td>
+                  <td className="px-5 py-3 text-agendou-muted">{fmtDateTime(a.starts_at)}</td>
                   <td className="px-5 py-3 font-medium">{(a.clients as any)?.full_name}</td>
-                  <td className="px-5 py-3 text-gray-400">{(a.services as any)?.name}</td>
+                  <td className="px-5 py-3 text-agendou-muted">{(a.services as any)?.name}</td>
                   <td className="px-5 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[a.status] ?? ''}`}>
                       {STATUS_LABELS[a.status]}

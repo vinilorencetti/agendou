@@ -20,8 +20,8 @@ export default async function PublicTenantLayout({
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   const brandForeground = luminance > 0.5 ? '#111111' : '#ffffff'
 
-  // Cor de fundo padrão — cinza muito claro se não definido
-  const bgColor = tenant.background_color || '#f9fafb'
+  // Cor de fundo padrão — dark purple se não configurado pelo tenant
+  const bgColor = tenant.background_color || '#0D0B12'
 
   return (
     <div

@@ -49,7 +49,7 @@ export default async function AgendaPage({ params, searchParams }: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold">Agenda</h1>
+      <h1 className="mb-6 text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Agenda</h1>
       <AgendaDayView
         date={date}
         today={today}

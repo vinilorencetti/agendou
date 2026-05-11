@@ -23,6 +23,25 @@ const STEP_LABELS: Record<Step, string> = {
   confirm: 'Confirmar',
 }
 
+const inputStyle = {
+  backgroundColor: 'var(--agendou-surface-2)',
+  color: 'var(--agendou-text)',
+  border: '1px solid var(--agendou-border)',
+}
+
+function useInputHandlers() {
+  return {
+    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+      e.currentTarget.style.borderColor = 'var(--agendou-border-purple)'
+      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)'
+    },
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+      e.currentTarget.style.borderColor = 'var(--agendou-border)'
+      e.currentTarget.style.boxShadow = ''
+    },
+  }
+}
+
 export default function OnboardingWizard({ userName }: { userName: string }) {
   const router = useRouter()
   const [step, setStep] = useState<Step>('business')
@@ -39,28 +58,20 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
   const [submitting, setSubmitting] = useState(false)
 
   const firstName = userName.split(' ')[0]
+  const inputHandlers = useInputHandlers()
 
-  // Atualiza slug automaticamente quando o nome muda (a menos que o usuário tenha editado manualmente)
   useEffect(() => {
     if (!slugEdited && form.businessName) {
       setForm((f) => ({ ...f, slug: generateSlug(form.businessName) }))
     }
   }, [form.businessName, slugEdited])
 
-  // Debounce da verificação de slug
   const checkSlug = useCallback(
     debounce(async (slug: string) => {
-      if (!slug || slug.length < 3) {
-        setSlugStatus('idle')
-        return
-      }
+      if (!slug || slug.length < 3) { setSlugStatus('idle'); return }
       setSlugStatus('checking')
       const result = await checkSlugAvailability(slug)
-      if (result.available) {
-        setSlugStatus('available')
-      } else {
-        setSlugStatus(result.reason === 'invalid' ? 'invalid' : 'taken')
-      }
+      setSlugStatus(result.available ? 'available' : (result.reason === 'invalid' ? 'invalid' : 'taken'))
     }, 500),
     []
   )
@@ -76,17 +87,8 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
     }
   }
 
-  function next() {
-    setError(null)
-    const idx = STEPS.indexOf(step)
-    setStep(STEPS[idx + 1])
-  }
-
-  function back() {
-    setError(null)
-    const idx = STEPS.indexOf(step)
-    setStep(STEPS[idx - 1])
-  }
+  function next() { setError(null); setStep(STEPS[STEPS.indexOf(step) + 1]) }
+  function back() { setError(null); setStep(STEPS[STEPS.indexOf(step) - 1]) }
 
   async function handleSubmit() {
     setSubmitting(true)
@@ -110,9 +112,7 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
   }
 
   const stepIndex = STEPS.indexOf(step)
-  const canProceedBusiness =
-    form.businessName.trim().length >= 3 &&
-    slugStatus === 'available'
+  const canProceedBusiness = form.businessName.trim().length >= 3 && slugStatus === 'available'
 
   return (
     <div className="w-full max-w-md">
@@ -122,46 +122,52 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
+                className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all"
+                style={
                   i < stepIndex
-                    ? 'bg-black text-white'
+                    ? { background: 'var(--agendou-gradient)', color: '#fff' }
                     : i === stepIndex
-                    ? 'border-2 border-black bg-white text-black'
-                    : 'border border-gray-200 bg-white text-gray-400'
-                }`}
+                    ? { border: '2px solid #7C3AED', color: '#C4B5FD', backgroundColor: 'rgba(124,58,237,0.15)' }
+                    : { border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-faint)', backgroundColor: 'var(--agendou-surface-2)' }
+                }
               >
                 {i < stepIndex ? '✓' : i + 1}
               </div>
               <span
-                className={`text-sm ${
-                  i === stepIndex ? 'font-medium text-black' : 'text-gray-400'
-                }`}
+                className="text-sm"
+                style={{ color: i === stepIndex ? 'var(--agendou-text)' : 'var(--agendou-text-faint)', fontWeight: i === stepIndex ? 600 : 400 }}
               >
                 {STEP_LABELS[s]}
               </span>
               {i < STEPS.length - 1 && (
-                <div className={`h-px w-6 ${i < stepIndex ? 'bg-black' : 'bg-gray-200'}`} />
+                <div
+                  className="h-px w-6 transition-colors"
+                  style={{ backgroundColor: i < stepIndex ? '#7C3AED' : 'var(--agendou-border)' }}
+                />
               )}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
+      <div
+        className="rounded-2xl p-6 shadow-2xl"
+        style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
+      >
         {/* Step 1 — Negócio */}
         {step === 'business' && (
           <div className="flex flex-col gap-5">
             <div>
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--agendou-text)' }}>
                 {firstName ? `Olá, ${firstName}! ` : ''}Qual é o nome do seu negócio?
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
                 Você pode mudar isso depois nas configurações.
               </p>
             </div>
 
             <div>
-              <label htmlFor="businessName" className="mb-1 block text-sm font-medium">
+              <label htmlFor="businessName" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
                 Nome do negócio
               </label>
               <input
@@ -172,16 +178,24 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
                 value={form.businessName}
                 onChange={set('businessName')}
                 placeholder="Barbearia do João"
-                className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
+                style={inputStyle}
+                {...inputHandlers}
               />
             </div>
 
             <div>
-              <label htmlFor="slug" className="mb-1 block text-sm font-medium">
+              <label htmlFor="slug" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
                 Endereço da sua página
               </label>
-              <div className="flex items-center rounded-md border focus-within:ring-2 focus-within:ring-black">
-                <span className="select-none rounded-l-md border-r bg-gray-50 px-3 py-2 text-xs text-gray-400">
+              <div
+                className="flex items-center overflow-hidden rounded-xl transition-all"
+                style={{ border: '1px solid var(--agendou-border)' }}
+              >
+                <span
+                  className="select-none px-3 py-2.5 text-xs"
+                  style={{ backgroundColor: 'var(--agendou-surface-2)', color: 'var(--agendou-text-faint)', borderRight: '1px solid var(--agendou-border)' }}
+                >
                   agendou.com.br/
                 </span>
                 <input
@@ -190,7 +204,8 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
                   value={form.slug}
                   onChange={set('slug')}
                   placeholder="barbearia-do-joao"
-                  className="flex-1 rounded-r-md px-3 py-2 text-sm outline-none"
+                  className="flex-1 px-3 py-2.5 text-sm outline-none placeholder:opacity-40"
+                  style={{ backgroundColor: 'var(--agendou-surface)', color: 'var(--agendou-text)' }}
                 />
               </div>
               <SlugFeedback status={slugStatus} slug={form.slug} />
@@ -199,7 +214,8 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
             <button
               onClick={next}
               disabled={!canProceedBusiness}
-              className="mt-2 rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-40"
+              className="mt-2 w-full rounded-xl py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/30 transition-all active:scale-[0.98] disabled:opacity-40"
+              style={{ background: 'var(--agendou-gradient)' }}
             >
               Continuar →
             </button>
@@ -210,12 +226,12 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
         {step === 'contact' && (
           <div className="flex flex-col gap-5">
             <div>
-              <h2 className="text-lg font-semibold">Informações de contato</h2>
-              <p className="mt-1 text-sm text-gray-500">Opcional — você pode preencher depois.</p>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--agendou-text)' }}>Informações de contato</h2>
+              <p className="mt-1 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>Opcional — você pode preencher depois.</p>
             </div>
 
             <div>
-              <label htmlFor="phone" className="mb-1 block text-sm font-medium">
+              <label htmlFor="phone" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
                 Telefone / WhatsApp
               </label>
               <input
@@ -224,13 +240,15 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
                 value={form.phone}
                 onChange={set('phone')}
                 placeholder="(11) 99999-9999"
-                className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
+                style={inputStyle}
+                {...inputHandlers}
               />
             </div>
 
             <div className="flex gap-3">
               <div className="flex-1">
-                <label htmlFor="addressCity" className="mb-1 block text-sm font-medium">
+                <label htmlFor="addressCity" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
                   Cidade
                 </label>
                 <input
@@ -239,18 +257,22 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
                   value={form.addressCity}
                   onChange={set('addressCity')}
                   placeholder="São Paulo"
-                  className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
+                  style={inputStyle}
+                  {...inputHandlers}
                 />
               </div>
               <div className="w-24">
-                <label htmlFor="addressState" className="mb-1 block text-sm font-medium">
+                <label htmlFor="addressState" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
                   Estado
                 </label>
                 <select
                   id="addressState"
                   value={form.addressState}
                   onChange={set('addressState')}
-                  className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all"
+                  style={inputStyle}
+                  {...inputHandlers}
                 >
                   <option value="">UF</option>
                   {STATES.map((s) => (
@@ -263,13 +285,15 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
             <div className="flex gap-3">
               <button
                 onClick={back}
-                className="flex-1 rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors"
+                style={{ border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-muted)', backgroundColor: 'var(--agendou-surface-2)' }}
               >
                 ← Voltar
               </button>
               <button
                 onClick={next}
-                className="flex-1 rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+                className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
+                style={{ background: 'var(--agendou-gradient)' }}
               >
                 Continuar →
               </button>
@@ -281,11 +305,11 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
         {step === 'confirm' && (
           <div className="flex flex-col gap-5">
             <div>
-              <h2 className="text-lg font-semibold">Tudo certo?</h2>
-              <p className="mt-1 text-sm text-gray-500">Revise antes de criar seu negócio.</p>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--agendou-text)' }}>Tudo certo?</h2>
+              <p className="mt-1 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>Revise antes de criar seu negócio.</p>
             </div>
 
-            <dl className="flex flex-col gap-3 rounded-lg bg-gray-50 p-4 text-sm">
+            <dl className="flex flex-col gap-3 rounded-xl p-4 text-sm" style={{ backgroundColor: 'var(--agendou-surface-2)', border: '1px solid var(--agendou-border)' }}>
               <Row label="Nome" value={form.businessName} />
               <Row label="Página" value={`agendou.com.br/${form.slug}`} />
               {form.phone && <Row label="Telefone" value={form.phone} />}
@@ -297,20 +321,26 @@ export default function OnboardingWizard({ userName }: { userName: string }) {
               )}
             </dl>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+                {error}
+              </p>
+            )}
 
             <div className="flex gap-3">
               <button
                 onClick={back}
                 disabled={submitting}
-                className="flex-1 rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
+                style={{ border: '1px solid var(--agendou-border)', color: 'var(--agendou-text-muted)', backgroundColor: 'var(--agendou-surface-2)' }}
               >
                 ← Voltar
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex-1 rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
+                className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-900/30 transition-all active:scale-[0.98] disabled:opacity-50"
+                style={{ background: 'var(--agendou-gradient)' }}
               >
                 {submitting ? 'Criando...' : 'Criar negócio 🚀'}
               </button>
@@ -334,24 +364,21 @@ function SlugFeedback({
   if (!slug || status === 'idle') return null
 
   const map = {
-    checking: { color: 'text-gray-400', msg: 'Verificando disponibilidade…' },
-    available: { color: 'text-green-600', msg: '✓ Disponível' },
-    taken: { color: 'text-red-500', msg: '✗ Este endereço já está em uso.' },
-    invalid: {
-      color: 'text-red-500',
-      msg: '✗ Use apenas letras minúsculas, números e hífens (mín. 3 caracteres).',
-    },
+    checking: { color: 'var(--agendou-text-faint)', msg: 'Verificando disponibilidade…' },
+    available: { color: '#4ADE80', msg: '✓ Disponível' },
+    taken: { color: '#F87171', msg: '✗ Este endereço já está em uso.' },
+    invalid: { color: '#F87171', msg: '✗ Use apenas letras minúsculas, números e hífens (mín. 3 caracteres).' },
   } as const
 
   const { color, msg } = map[status as keyof typeof map] ?? { color: '', msg: '' }
-  return <p className={`mt-1 text-xs ${color}`}>{msg}</p>
+  return <p className="mt-1 text-xs" style={{ color }}>{msg}</p>
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="text-gray-500">{label}</dt>
-      <dd className="text-right font-medium">{value}</dd>
+      <dt style={{ color: 'var(--agendou-text-muted)' }}>{label}</dt>
+      <dd className="text-right font-medium" style={{ color: 'var(--agendou-text)' }}>{value}</dd>
     </div>
   )
 }

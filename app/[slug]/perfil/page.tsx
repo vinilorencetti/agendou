@@ -24,12 +24,17 @@ export default async function ClientProfilePage({ params }: Props) {
   const name = profile?.full_name ?? user.email ?? 'Cliente'
   const email = user.email ?? ''
 
+  const cardStyle = {
+    backgroundColor: 'var(--agendou-surface)',
+    border: '1px solid var(--agendou-border)',
+  }
+
   return (
     <div className="mx-auto max-w-lg px-4 pb-24 pt-8">
-      <h1 className="mb-6 text-xl font-bold text-gray-900">Meu perfil</h1>
+      <h1 className="mb-6 text-xl font-bold" style={{ color: 'var(--agendou-text)' }}>Meu perfil</h1>
 
       {/* Cartão do usuário */}
-      <div className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5">
+      <div className="flex items-center gap-4 rounded-2xl p-5 shadow-sm" style={cardStyle}>
         <div
           className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-xl font-bold"
           style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)' }}
@@ -37,8 +42,8 @@ export default async function ClientProfilePage({ params }: Props) {
           {name[0].toUpperCase()}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-semibold text-gray-900">{name}</p>
-          <p className="truncate text-sm text-gray-500">{email}</p>
+          <p className="truncate font-semibold" style={{ color: 'var(--agendou-text)' }}>{name}</p>
+          <p className="truncate text-sm" style={{ color: 'var(--agendou-text-muted)' }}>{email}</p>
         </div>
       </div>
 
@@ -46,28 +51,30 @@ export default async function ClientProfilePage({ params }: Props) {
       <div className="mt-4 space-y-2.5">
         <a
           href={`/${slug}/meus-agendamentos`}
-          className="flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-gray-50"
+          className="flex w-full items-center justify-between rounded-2xl p-4 shadow-sm transition-colors"
+          style={cardStyle}
         >
           <div className="flex items-center gap-3">
             <span
               className="flex h-9 w-9 items-center justify-center rounded-xl text-base"
-              style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)', opacity: 0.9 }}
+              style={{ backgroundColor: 'var(--color-brand)', color: 'var(--color-brand-foreground)' }}
             >
               📅
             </span>
-            <span className="font-medium text-gray-900">Meus agendamentos</span>
+            <span className="font-medium" style={{ color: 'var(--agendou-text)' }}>Meus agendamentos</span>
           </div>
-          <span className="text-gray-400">›</span>
+          <span style={{ color: 'var(--agendou-text-faint)' }}>›</span>
         </a>
 
         <LogoutButton
           redirectTo={`/${slug}`}
-          className="flex w-full items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-red-50"
+          className="flex w-full items-center gap-3 rounded-2xl p-4 shadow-sm transition-colors"
+          style={{ ...cardStyle, border: '1px solid rgba(239,68,68,0.2)' } as React.CSSProperties}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-base">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl text-base" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
             🚪
           </span>
-          <span className="font-medium text-red-500">Sair da conta</span>
+          <span className="font-medium text-red-400">Sair da conta</span>
         </LogoutButton>
       </div>
 

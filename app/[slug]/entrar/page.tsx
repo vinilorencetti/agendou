@@ -38,16 +38,19 @@ export default async function ClientLoginPage({ params, searchParams }: Props) {
             </div>
           )}
           <div>
-            <h1 className="text-xl font-bold">{tenant.name}</h1>
-            <p className="mt-0.5 text-sm text-gray-500">Faça login para agendar</p>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--agendou-text)' }}>{tenant.name}</h1>
+            <p className="mt-0.5 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>Faça login para agendar</p>
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <div
+          className="rounded-2xl p-6 shadow-xl"
+          style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
+        >
           <ClientLoginForm slug={slug} redirectTo={redirectTo} />
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
           Não tem conta?{' '}
           <a
             href={`/${slug}/cadastro${redirectTo ? `?redirect=${redirectTo}` : ''}`}

@@ -21,11 +21,11 @@ export default async function HorariosPage({ params }: Props) {
 
   return (
     <div className="max-w-lg">
-      <h1 className="mb-2 text-xl font-semibold">Horário de funcionamento</h1>
-      <p className="mb-6 text-sm text-gray-500">
+      <h1 className="mb-2 text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Horário de funcionamento</h1>
+      <p className="mb-6 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
         Define quando clientes podem fazer agendamentos. Os profissionais têm horários próprios configurados separadamente.
       </p>
-      <div className="rounded-xl border bg-white p-6">
+      <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}>
         <BusinessHoursEditor
           tenantId={tenant.id}
           slug={slug}

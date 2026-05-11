@@ -13,9 +13,20 @@ const config: Config = {
           DEFAULT: 'var(--color-brand)',
           foreground: 'var(--color-brand-foreground)',
         },
+        agendou: {
+          bg: 'var(--agendou-bg)',
+          surface: 'var(--agendou-surface)',
+          'surface-2': 'var(--agendou-surface-2)',
+          text: 'var(--agendou-text)',
+          muted: 'var(--agendou-text-muted)',
+          faint: 'var(--agendou-text-faint)',
+        },
       },
       spacing: {
         18: '4.5rem',
+      },
+      backgroundImage: {
+        'agendou-gradient': 'var(--agendou-gradient)',
       },
     },
   },

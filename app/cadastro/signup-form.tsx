@@ -40,13 +40,28 @@ export default function SignUpForm() {
     }
   }
 
+  const inputStyle = {
+    backgroundColor: 'var(--agendou-surface-2)',
+    color: 'var(--agendou-text)',
+    border: '1px solid var(--agendou-border)',
+  }
+
+  function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
+    e.currentTarget.style.borderColor = 'var(--agendou-border-purple)'
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)'
+  }
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    e.currentTarget.style.borderColor = 'var(--agendou-border)'
+    e.currentTarget.style.boxShadow = ''
+  }
+
   if (done) {
     return (
-      <div className="rounded-lg border bg-gray-50 p-6 text-center">
-        <p className="text-2xl">📬</p>
-        <h2 className="mt-3 font-semibold">Confirme seu e-mail</h2>
-        <p className="mt-2 text-sm text-gray-500">
-          Enviamos um link para <strong>{fields.email}</strong>.
+      <div className="rounded-xl p-6 text-center" style={{ backgroundColor: 'var(--agendou-surface-2)', border: '1px solid var(--agendou-border)' }}>
+        <p className="text-3xl">📬</p>
+        <h2 className="mt-3 font-semibold" style={{ color: 'var(--agendou-text)' }}>Confirme seu e-mail</h2>
+        <p className="mt-2 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>
+          Enviamos um link para <strong style={{ color: 'var(--agendou-text)' }}>{fields.email}</strong>.
           Clique nele para ativar sua conta e continuar.
         </p>
       </div>
@@ -55,61 +70,40 @@ export default function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <label htmlFor="fullName" className="mb-1 block text-sm font-medium">
-          Seu nome
-        </label>
-        <input
-          id="fullName"
-          type="text"
-          autoComplete="name"
-          required
-          value={fields.fullName}
-          onChange={set('fullName')}
-          placeholder="João Silva"
-          className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
+      {[
+        { id: 'fullName', label: 'Seu nome', type: 'text', autoComplete: 'name', placeholder: 'João Silva', key: 'fullName' as const },
+        { id: 'email', label: 'E-mail', type: 'email', autoComplete: 'email', placeholder: 'joao@barbearia.com', key: 'email' as const },
+        { id: 'password', label: 'Senha', type: 'password', autoComplete: 'new-password', placeholder: 'Mínimo 8 caracteres', key: 'password' as const },
+      ].map(({ id, label, key, ...inputProps }) => (
+        <div key={id} className="flex flex-col gap-1.5">
+          <label htmlFor={id} className="text-sm font-medium" style={{ color: 'var(--agendou-text-muted)' }}>
+            {label}
+          </label>
+          <input
+            id={id}
+            required
+            value={fields[key]}
+            onChange={set(key)}
+            className="rounded-xl px-4 py-2.5 text-sm outline-none transition-all placeholder:opacity-40"
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            {...inputProps}
+          />
+        </div>
+      ))}
 
-      <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium">
-          E-mail
-        </label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={fields.email}
-          onChange={set('email')}
-          placeholder="joao@barbearia.com"
-          className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium">
-          Senha
-        </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={8}
-          value={fields.password}
-          onChange={set('password')}
-          placeholder="Mínimo 8 caracteres"
-          className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
-
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && (
+        <p className="rounded-lg px-3 py-2 text-sm text-red-400" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+          {error}
+        </p>
+      )}
 
       <button
         type="submit"
         disabled={loading}
-        className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
+        className="mt-1 w-full rounded-xl py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/30 transition-all active:scale-[0.98] disabled:opacity-50"
+        style={{ background: 'var(--agendou-gradient)' }}
       >
         {loading ? 'Criando conta...' : 'Criar conta grátis'}
       </button>

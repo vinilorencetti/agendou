@@ -18,8 +18,8 @@ export default async function ServicosPage({ params }: Props) {
     <div className="max-w-2xl">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold">Serviços</h1>
-          <p className="mt-0.5 text-sm text-gray-500">{services.length} serviço{services.length !== 1 ? 's' : ''} cadastrado{services.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-xl font-semibold" style={{ color: 'var(--agendou-text)' }}>Serviços</h1>
+          <p className="mt-0.5 text-sm" style={{ color: 'var(--agendou-text-muted)' }}>{services.length} serviço{services.length !== 1 ? 's' : ''} cadastrado{services.length !== 1 ? 's' : ''}</p>
         </div>
       </div>
       <ServicesManager tenantId={tenant.id} initialServices={services} />

@@ -27,12 +27,12 @@ type Professional = { id: string; name: string; avatar_url: string | null }
 type Service = { id: string; name: string; duration_min: number; price: number }
 
 const STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-  confirmed:   { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8' },
-  pending:     { bg: '#fffbeb', border: '#f59e0b', text: '#b45309' },
-  in_progress: { bg: '#f0fdf4', border: '#22c55e', text: '#15803d' },
-  completed:   { bg: '#f9fafb', border: '#9ca3af', text: '#6b7280' },
-  cancelled:   { bg: '#fef2f2', border: '#ef4444', text: '#b91c1c' },
-  no_show:     { bg: '#fdf4ff', border: '#a855f7', text: '#7e22ce' },
+  confirmed:   { bg: 'rgba(59,130,246,0.18)',  border: '#3b82f6', text: '#60a5fa' },
+  pending:     { bg: 'rgba(234,179,8,0.18)',   border: '#d97706', text: '#fbbf24' },
+  in_progress: { bg: 'rgba(34,197,94,0.18)',   border: '#16a34a', text: '#4ade80' },
+  completed:   { bg: 'rgba(255,255,255,0.06)', border: '#6b7280', text: '#9ca3af' },
+  cancelled:   { bg: 'rgba(239,68,68,0.18)',   border: '#ef4444', text: '#f87171' },
+  no_show:     { bg: 'rgba(167,139,250,0.18)', border: '#8b5cf6', text: '#c4b5fd' },
 }
 const STATUS_LABELS: Record<string, string> = {
   confirmed: 'Confirmado', pending: 'Pendente', in_progress: 'Em atendimento',
@@ -74,48 +74,91 @@ export default function AgendaDayView({
   function navigate(d: string) { router.push(`/admin/${slug}/agenda?date=${d}`) }
   function refresh() { router.refresh() }
 
+  const navBtnStyle = {
+    backgroundColor: 'var(--agendou-surface)',
+    border: '1px solid var(--agendou-border)',
+    color: 'var(--agendou-text-muted)',
+  }
+
   return (
     <div>
       {/* Navegação */}
       <div className="mb-4 flex items-center gap-2 flex-wrap">
-        <button onClick={() => navigate(addDays(date, -1))} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50">←</button>
+        <button
+          onClick={() => navigate(addDays(date, -1))}
+          className="rounded-xl px-3 py-1.5 text-sm transition-colors"
+          style={navBtnStyle}
+        >←</button>
+
         <div className="flex gap-1 overflow-x-auto">
           {[-2,-1,0,1,2,3,4].map((offset) => {
             const d = addDays(date, offset)
             const isToday = d === today
             const isSel = d === date
             return (
-              <button key={d} onClick={() => navigate(d)}
-                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${isSel ? 'bg-black text-white' : isToday ? 'border border-black/30' : 'text-gray-500 hover:bg-gray-100'}`}>
+              <button
+                key={d}
+                onClick={() => navigate(d)}
+                className="shrink-0 rounded-xl px-3 py-1.5 text-xs font-medium transition-all"
+                style={isSel
+                  ? { background: 'var(--agendou-gradient)', color: '#fff' }
+                  : isToday
+                  ? { backgroundColor: 'rgba(124,58,237,0.15)', color: '#C4B5FD', border: '1px solid rgba(124,58,237,0.35)' }
+                  : { color: 'var(--agendou-text-muted)' }
+                }
+              >
                 {isToday && !isSel ? 'Hoje' : fmtDay(d)}
               </button>
             )
           })}
         </div>
-        <button onClick={() => navigate(addDays(date, 1))} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50">→</button>
-        {date !== today && <button onClick={() => navigate(today)} className="ml-auto rounded-lg border px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50">Hoje</button>}
 
-        {/* Ações */}
+        <button
+          onClick={() => navigate(addDays(date, 1))}
+          className="rounded-xl px-3 py-1.5 text-sm transition-colors"
+          style={navBtnStyle}
+        >→</button>
+        {date !== today && (
+          <button
+            onClick={() => navigate(today)}
+            className="ml-auto rounded-xl px-3 py-1.5 text-xs transition-colors"
+            style={navBtnStyle}
+          >Hoje</button>
+        )}
+
         <div className="ml-auto flex gap-2">
-          <button onClick={() => setShowBlock(true)}
-            className="rounded-lg border px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50">
+          <button
+            onClick={() => setShowBlock(true)}
+            className="rounded-xl px-3 py-1.5 text-xs font-medium transition-colors"
+            style={navBtnStyle}
+          >
             🚫 Bloquear
           </button>
-          <button onClick={() => setShowBooking(true)}
-            className="rounded-lg bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800">
+          <button
+            onClick={() => setShowBooking(true)}
+            className="rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition-all active:scale-[0.98]"
+            style={{ background: 'var(--agendou-gradient)' }}
+          >
             + Novo agendamento
           </button>
         </div>
       </div>
 
       {/* Grade */}
-      <div className="overflow-x-auto rounded-xl border bg-white">
+      <div
+        className="overflow-x-auto rounded-2xl"
+        style={{ backgroundColor: 'var(--agendou-surface)', border: '1px solid var(--agendou-border)' }}
+      >
         <div className="flex min-w-[500px]">
           {/* Horas */}
-          <div className="w-14 shrink-0 border-r">
-            <div className="h-10 border-b" />
+          <div className="w-14 shrink-0" style={{ borderRight: '1px solid var(--agendou-border)' }}>
+            <div className="h-10" style={{ borderBottom: '1px solid var(--agendou-border)' }} />
             {hours.map((h) => (
-              <div key={h} className="relative flex items-start justify-end pr-2 text-[10px] text-gray-400" style={{ height: PX_PER_HOUR }}>
+              <div
+                key={h}
+                className="relative flex items-start justify-end pr-2 text-[10px]"
+                style={{ height: PX_PER_HOUR, color: 'var(--agendou-text-faint)' }}
+              >
                 <span className="-translate-y-2">{String(h).padStart(2,'0')}:00</span>
               </div>
             ))}
@@ -125,19 +168,34 @@ export default function AgendaDayView({
           {professionals.map((pro) => {
             const proAppts = appointments.filter((a) => a.professionals?.id === pro.id)
             return (
-              <div key={pro.id} className="flex-1 border-r last:border-r-0 min-w-[120px]">
-                <div className="flex h-10 items-center gap-2 border-b px-3">
+              <div
+                key={pro.id}
+                className="flex-1 min-w-[120px]"
+                style={{ borderRight: '1px solid var(--agendou-border)' }}
+              >
+                <div className="flex h-10 items-center gap-2 px-3" style={{ borderBottom: '1px solid var(--agendou-border)' }}>
                   {pro.avatar_url
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={pro.avatar_url} alt={pro.name} className="h-6 w-6 rounded-full object-cover" />
-                    : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold">{pro.name[0]}</div>
+                    : (
+                      <div
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                        style={{ background: 'var(--agendou-gradient)' }}
+                      >
+                        {pro.name[0]}
+                      </div>
+                    )
                   }
-                  <span className="truncate text-xs font-medium">{pro.name}</span>
+                  <span className="truncate text-xs font-medium" style={{ color: 'var(--agendou-text)' }}>{pro.name}</span>
                 </div>
 
                 <div className="relative" style={{ height: (DAY_END_HOUR - DAY_START_HOUR) * PX_PER_HOUR }}>
                   {hours.map((h) => (
-                    <div key={h} className="absolute w-full border-t border-gray-100" style={{ top: (h - DAY_START_HOUR) * PX_PER_HOUR }} />
+                    <div
+                      key={h}
+                      className="absolute w-full"
+                      style={{ top: (h - DAY_START_HOUR) * PX_PER_HOUR, borderTop: '1px solid var(--agendou-border)' }}
+                    />
                   ))}
                   <NowLine />
 
@@ -149,10 +207,12 @@ export default function AgendaDayView({
                     const c = STATUS_COLORS[appt.status] ?? STATUS_COLORS.confirmed
                     const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
                     return (
-                      <div key={appt.id}
+                      <div
+                        key={appt.id}
                         onClick={() => setSelectedAppt(appt)}
-                        className="absolute left-1 right-1 cursor-pointer overflow-hidden rounded-md border-l-2 px-2 py-1 text-[11px] leading-tight hover:brightness-95 transition-all"
-                        style={{ top, height, backgroundColor: c.bg, borderColor: c.border, color: c.text }}>
+                        className="absolute left-1 right-1 cursor-pointer overflow-hidden rounded-lg border-l-2 px-2 py-1 text-[11px] leading-tight transition-all hover:brightness-110"
+                        style={{ top, height, backgroundColor: c.bg, borderColor: c.border, color: c.text }}
+                      >
                         <p className="font-semibold truncate">{appt.clients?.full_name}</p>
                         {height > 32 && <p className="truncate opacity-75">{appt.services?.name}</p>}
                         {height > 48 && <p className="opacity-60">{fmt.format(appt.price_snapshot)}</p>}
@@ -165,7 +225,7 @@ export default function AgendaDayView({
           })}
 
           {professionals.length === 0 && (
-            <div className="flex flex-1 items-center justify-center py-20 text-sm text-gray-400">
+            <div className="flex flex-1 items-center justify-center py-20 text-sm" style={{ color: 'var(--agendou-text-faint)' }}>
               Nenhum profissional cadastrado.
             </div>
           )}
@@ -177,7 +237,7 @@ export default function AgendaDayView({
         {Object.entries(STATUS_LABELS).map(([s, label]) => {
           const c = STATUS_COLORS[s]
           return (
-            <div key={s} className="flex items-center gap-1.5 text-xs text-gray-500">
+            <div key={s} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--agendou-text-muted)' }}>
               <span className="h-2.5 w-2.5 rounded-sm border-l-2" style={{ backgroundColor: c.bg, borderColor: c.border }} />
               {label}
             </div>
@@ -219,8 +279,8 @@ function NowLine() {
   if (h < DAY_START_HOUR || h >= DAY_END_HOUR) return null
   return (
     <div className="pointer-events-none absolute left-0 right-0 z-10 flex items-center" style={{ top }}>
-      <div className="h-2 w-2 rounded-full bg-red-500" />
-      <div className="h-px flex-1 bg-red-400" />
+      <div className="h-2 w-2 rounded-full bg-violet-400" />
+      <div className="h-px flex-1 bg-violet-400 opacity-60" />
     </div>
   )
 }
